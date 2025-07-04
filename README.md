@@ -1,268 +1,297 @@
-# StarSeek: A Unified Full-Text Search Mid-Platform for Data Warehouses and Lakehouses
+# StarSeek
 
+A high-performance, enterprise-grade full-text search middleware service designed for modern data warehouses and data lakes, with primary support for StarRocks, ClickHouse, and Apache Doris.
 
-## 🌟 Project Overview
+[中文文档](README-zh.md) | [Architecture](docs/architecture.md)
 
-StarSeek is an innovative open-source mid-platform designed to empower columnar analytical databases like StarRocks, Apache Doris, and ClickHouse with advanced full-text search capabilities typically found in dedicated search engines such as Elasticsearch. Leveraging the robust inverted index features of these OLAP databases, StarSeek provides a unified, intelligent, and highly scalable search service layer, significantly enhancing their utility for document retrieval, content search, and complex data exploration.
+## Overview
 
-This project addresses the inherent limitations of analytical databases in handling sophisticated full-text search requirements, transforming them into powerful search backends without the overhead of maintaining a separate search cluster.
+StarSeek bridges the gap between traditional OLAP databases and modern search requirements by providing a unified full-text search layer. It leverages inverted indexes from underlying data warehouses while adding advanced search capabilities like ranking, highlighting, and cross-table queries.
 
-## 🎯 Key Pain Points & Core Value
+### Core Pain Points Addressed
 
-### Pain Points Addressed
+- **Fragmented Search Experience**: Different tables and columns with inverted indexes scattered across databases
+- **Limited Search Capabilities**: OLAP databases lack advanced search features like relevance scoring and highlighting
+- **Performance Bottlenecks**: Large UNION ALL queries causing performance degradation
+- **Maintenance Complexity**: Manual management of search metadata across multiple tables
 
-*   **Limited Native Full-Text Search Capabilities**: While StarRocks, Doris, and ClickHouse offer basic inverted index functionalities, they lack advanced search features such as cross-table/cross-column queries, relevance scoring (TF-IDF/BM25), synonym expansion, result highlighting, and unified metadata management.
-*   **Complex Development & Maintenance**: Developers often need to manually construct intricate SQL queries (e.g., `MATCH_AGAINST`, `UNION ALL`), handle tokenization consistency, and implement ranking logic in the application layer, leading to increased complexity and reduced efficiency.
-*   **Suboptimal User Experience**: End-users often face less precise search results and a lack of advanced interactive search features, which are commonplace in modern search applications.
-*   **Data Source Coupling**: Applications become tightly coupled with the specific SQL dialect and indexing mechanisms of the underlying analytical database, hindering flexibility and future migration.
+### Key Value Propositions
 
-### Core Value Proposition
+- **Unified Search Interface**: Single API endpoint for multi-table, multi-column full-text search
+- **Advanced Search Features**: TF-IDF scoring, pagination, highlighting, synonym expansion
+- **High Performance**: Bitmap optimization, Redis caching, and concurrent query execution
+- **Multi-Database Support**: StarRocks (primary), ClickHouse, and Apache Doris compatibility
+- **Enterprise Ready**: Built-in observability, error handling, and horizontal scalability
 
-*   **Unified Search Gateway**: StarSeek acts as a single, standardized API endpoint for all full-text search operations across your analytical data stores, simplifying client-side integration.
-*   **Feature Augmentation**: It bridges the functional gap, introducing Elasticsearch-like capabilities such as:
-    *   **Unified Index Metadata Management**: Centralized registry for all indexed columns across multiple tables and databases.
-    *   **Advanced Query Processing**: Support for natural language queries, multi-field search (`title:keyword AND content:another`), synonym expansion, and intelligent query translation to optimized SQL.
-    *   **Simulated Relevance Ranking**: Implements server-side TF-IDF/BM25-like scoring, providing highly relevant search results.
-    *   **Highlighting & Pagination**: Essential features for a rich user search experience.
-    *   **Cross-Table/Cross-Column Search**: Seamlessly search across multiple tables and columns with a single query.
-*   **Enhanced Developer Efficiency**: Abstract away the complexities of SQL generation, tokenization, and ranking, allowing developers to focus on application logic.
-*   **Data Source Agnosticism**: Provides an adapter layer to support StarRocks, Apache Doris, and ClickHouse, ensuring future extensibility to other similar databases.
-*   **Performance Optimization**: Incorporates caching mechanisms (e.g., Redis for hot keywords) and concurrent query execution management to optimize search performance.
+## Features
 
-## ✨ Main Features
+### Core Capabilities
 
-*   **Index Registry Service**:
-    *   Centralized management of indexed column metadata (table name, column name, index type, tokenizer, data type).
-    *   Supports various index types: English, Chinese, Multilingual, No-tokenizer.
-*   **Query Processing Engine**:
-    *   Translates natural language queries into optimized SQL.
-    *   Integrated multi-language tokenization (consistent with StarRocks' indexing).
-    *   Optional synonym expansion.
-    *   Field filtering and boolean logic support (`field:keyword`).
-    *   Simulated keyword scoring for ranking.
-    *   Automated cross-table SQL query generation.
-*   **Query Optimization Module**:
-    *   Caching of query results for hot keywords (e.g., in Redis).
-    *   Potential for result set caching to accelerate subsequent requests.
-    *   Leveraging underlying database's column-store optimization.
-*   **Ranking Module (Elasticsearch-like Simulation)**:
-    *   Server-side calculation of pseudo TF-IDF/BM25 scores.
-    *   Term Frequency (TF) calculation based on text content.
-    *   Inverse Document Frequency (IDF) based on pre-computed statistics.
-*   **Task Scheduling & Concurrency Control**:
-    *   Manages concurrent SQL execution tasks to prevent database overload.
-    *   Configurable concurrency limits.
-*   **Multi-Database Support**:
-    *   Designed with an extensible adapter pattern to support StarRocks, Apache Doris, and ClickHouse as primary backends, with StarRocks as the core focus.
+- **Index Registry Management**: Centralized metadata management for all inverted indexes
+- **Multi-Language Support**: Chinese/English/Multi-language tokenization matching database strategies
+- **Cross-Table Search**: Query across multiple tables and columns simultaneously
+- **Advanced Ranking**: TF-IDF and BM25-like scoring algorithms
+- **Query Optimization**: Bitmap filtering, result caching, and hot keyword preloading
+- **Concurrent Processing**: Task scheduling with flow control instead of large SQL unions
 
-## 🏛️ Architecture Overview
+### Search API Example
 
-The detailed architecture of StarSeek, including its layered design, module interactions, and deployment considerations, is thoroughly documented in `docs/architecture.md`.
-
-[Explore the comprehensive Architecture Design](docs/architecture.md)
-
-## 🚀 Building and Running Guide
-
-### Prerequisites
-
-*   Go (version 1.20.2 or later)
-*   Git
-*   Docker (for local database setup, optional but recommended)
-*   StarRocks, Doris, or ClickHouse instance (or a Dockerized setup)
-*   Redis instance (for caching)
-
-### Getting Started
-
-1.  **Clone the repository:**
-    ```bash
-    git clone https://github.com/turtacn/starseek.git
-    cd starseek
-    ```
-
-2.  **Install dependencies:**
-    ```bash
-    go mod tidy
-    ```
-
-3.  **Configure Environment Variables (Example):**
-    Create a `.env` file or set environment variables:
-    ```
-    STARSEEK_DB_TYPE=starrocks
-    STARSEEK_DB_HOST=localhost
-    STARSEEK_DB_PORT=9030
-    STARSEEK_DB_USER=root
-    STARSEEK_DB_PASSWORD=
-    STARSEEK_DB_NAME=your_database
-    STARSEEK_REDIS_ADDR=localhost:6379
-    STARSEEK_LISTEN_ADDR=:8080
-    STARSEEK_LOG_LEVEL=info
-    # More configurations will be detailed in docs/configuration.md
-    ```
-
-4.  **Build the application:**
-    ```bash
-    go build -o starseek ./cmd/starseek/main.go
-    ```
-
-5.  **Run the application:**
-    ```bash
-    ./starseek
-    ```
-    The service will start listening on the configured address (e.g., `http://localhost:8080`).
-
-### Docker Setup (Example for StarRocks)
-
-For development and testing, you can use Docker Compose to spin up a StarRocks instance.
 ```bash
-# Example docker-compose.yml (simplified)
-version: '3.8'
-services:
-  starrocks-fe:
-    image: starrocks/starrocks:latest
-    ports:
-      - "9030:9030" # FE Query Port
-      - "8030:8030" # HTTP Port
-    environment:
-      - FE_SERVERS="127.0.0.1:9030"
-    command: ["/opt/starrocks/bin/start_fe.sh"]
-  redis:
-    image: redis:6-alpine
-    ports:
-      - "6379:6379"
+# Basic search across multiple fields
+GET /api/v1/search?q=人工智能&fields=title,content&limit=10&offset=0
+
+# Advanced field-specific search
+GET /api/v1/search?q=title:技术 AND content:创新&highlight=true
+
+# Multi-database search
+GET /api/v1/search?q=machine learning&databases=starrocks,clickhouse
 ````
 
-Run: `docker-compose up -d`
-
-## 🧪 Code Snippets & Capabilities Demo
-
-### 1. Index Registration (API Endpoint)
-
-Registering an inverted index column for a table. This would typically be done via an admin API.
+### Go SDK Example
 
 ```go
-// Example of how the internal service might interact with the Index Registry
-// (Actual API might be HTTP POST to /api/v1/indexes/register)
 package main
 
 import (
-	"context"
-	"fmt"
-	"github.com/turtacn/starseek/internal/application"
-	"github.com/turtacn/starseek/internal/common/types/enum"
-	"github.com/turtacn/starseek/internal/domain/index"
-	"github.com/turtacn/starseek/internal/infrastructure/persistence/inmemory"
-	"github.com/turtacn/starseek/internal/infrastructure/logger"
+    "context"
+    "fmt"
+    "log"
+    
+    "github.com/turtacn/starseek/pkg/client"
 )
 
 func main() {
-	// Initialize logger
-	l := logger.NewZapLogger()
-	// Using in-memory for demo; persistence would be a database
-	repo := inmemory.NewIndexMetadataRepository()
-	service := application.NewIndexService(repo, l)
-
-	ctx := context.Background()
-
-	// Register a document title column
-	err := service.RegisterIndex(ctx, index.RegisterIndexCommand{
-		TableName:   "documents",
-		ColumnName:  "title",
-		IndexType:   enum.IndexTypeChinese,
-		Tokenizer:   "jieba",
-		DataType:    "VARCHAR",
-		Description: "Document title for full-text search",
-	})
-	if err != nil {
-		fmt.Printf("Failed to register index for documents.title: %v\n", err)
-	} else {
-		fmt.Println("Successfully registered index for documents.title")
-	}
-
-	// Register a product description column
-	err = service.RegisterIndex(ctx, index.RegisterIndexCommand{
-		TableName:   "products",
-		ColumnName:  "description",
-		IndexType:   enum.IndexTypeEnglish,
-		Tokenizer:   "standard",
-		DataType:    "TEXT",
-		Description: "Product description for full-text search",
-	})
-	if err != nil {
-		fmt.Printf("Failed to register index for products.description: %v\n", err)
-	} else {
-		fmt.Println("Successfully registered index for products.description")
-	}
-
-	// Example of fetching registered indexes
-	allIndexes, err := service.ListIndexes(ctx, index.ListIndexesQuery{})
-	if err != nil {
-		fmt.Printf("Failed to list indexes: %v\n", err)
-	} else {
-		fmt.Println("\nRegistered Indexes:")
-		for _, idx := range allIndexes {
-			fmt.Printf("- Table: %s, Column: %s, Type: %s, Tokenizer: %s\n",
-				idx.TableName, idx.ColumnName, idx.IndexType.String(), idx.Tokenizer)
-		}
-	}
+    // Initialize StarSeek client
+    client := starseek.NewClient(&starseek.Config{
+        Endpoint: "http://localhost:8080",
+        APIKey:   "your-api-key",
+    })
+    
+    // Perform search
+    ctx := context.Background()
+    result, err := client.Search(ctx, &starseek.SearchRequest{
+        Query:     "人工智能",
+        Fields:    []string{"title", "content"},
+        Limit:     10,
+        Highlight: true,
+    })
+    
+    if err != nil {
+        log.Fatal(err)
+    }
+    
+    fmt.Printf("Found %d results in %dms\n", result.Total, result.Took)
+    for _, hit := range result.Hits {
+        fmt.Printf("Score: %.2f, Table: %s, ID: %s\n", 
+            hit.Score, hit.Table, hit.ID)
+    }
 }
 ```
 
-### 2. Cross-Table Full-Text Search (HTTP API Example)
+## Architecture Overview
 
-Simulating a search request via a `curl` command. The StarSeek service processes this.
+StarSeek follows a layered architecture with clear separation of concerns:
 
-```bash
-# Search for "人工智能" (Artificial Intelligence) across 'documents' and 'articles' tables
-# in 'title' and 'content' fields.
-# Request might look like:
-curl -X GET "http://localhost:8080/api/v1/search?q=人工智能&fields=title,content&tables=documents,articles&page=1&pageSize=10" \
-     -H "Content-Type: application/json"
-
-# Example Response (simplified):
-# {
-#   "query": "人工智能",
-#   "results": [
-#     {
-#       "table": "documents",
-#       "rowId": "doc_123",
-#       "score": 0.85,
-#       "highlight": {
-#         "title": "关于<B>人工智能</B>在教育领域的应用",
-#         "content": "近年来，<B>人工智能</B>技术飞速发展..."
-#       },
-#       "data": { /* Original row data */ }
-#     },
-#     {
-#       "table": "articles",
-#       "rowId": "art_456",
-#       "score": 0.72,
-#       "highlight": {
-#         "content": "深度学习是<B>人工智能</B>的核心分支..."
-#       },
-#       "data": { /* Original row data */ }
-#     }
-#   ],
-#   "totalHits": 250,
-#   "currentPage": 1,
-#   "pageSize": 10
-# }
+```mermaid
+graph TB
+    subgraph API[API Layer]
+        REST[REST API]
+        SDK[Go SDK]
+    end
+    
+    subgraph APP[Application Layer]
+        QP[Query Processor]
+        RM[Ranking Module]
+        TS[Task Scheduler]
+    end
+    
+    subgraph CORE[Core Layer]
+        IR[Index Registry]
+        QO[Query Optimizer]
+        CM[Cache Manager]
+    end
+    
+    subgraph INFRA[Infrastructure Layer]
+        SR[StarRocks]
+        CH[ClickHouse]
+        DR[Doris]
+        RD[Redis]
+    end
+    
+    API --> APP
+    APP --> CORE
+    CORE --> INFRA
 ```
 
-### 3. Field-Specific Search
+For detailed architecture information, see [Architecture Documentation](docs/architecture.md).
+
+## Quick Start
+
+### Prerequisites
+
+* Go 1.20.2+
+* Redis 6.0+
+* One of: StarRocks 3.0+, ClickHouse 22.0+, Apache Doris 2.0+
+
+### Installation
 
 ```bash
-# Search for keyword "starrocks" specifically in 'title' and "performance" in 'content'
-curl -X GET "http://localhost:8080/api/v1/search?q=title:starrocks AND content:performance&tables=documents&page=1&pageSize=5" \
-     -H "Content-Type: application/json"
+# Clone the repository
+git clone https://github.com/turtacn/starseek.git
+cd starseek
+
+# Build the project
+make build
+
+# Run with default configuration
+./bin/starseek server --config config/server.yaml
 ```
 
-## 🤝 Contribution Guide
+### Configuration
 
-We welcome contributions from the community! If you're interested in improving StarSeek, please check out our:
+```yaml
+# config/server.yaml
+server:
+  host: "0.0.0.0"
+  port: 8080
+  
+databases:
+  starrocks:
+    host: "localhost"
+    port: 9030
+    username: "root"
+    password: ""
+    
+redis:
+  host: "localhost"
+  port: 6379
+  
+logging:
+  level: "info"
+  format: "json"
+```
 
-* [Contribution Guidelines](CONTRIBUTING.md)
-* [Code of Conduct](CODE_OF_CONDUCT.md)
+### Docker Deployment
+
+```bash
+# Using Docker Compose
+docker-compose up -d
+
+# Or build and run manually
+docker build -t starseek:latest .
+docker run -p 8080:8080 -v $(pwd)/config:/app/config starseek:latest
+```
+
+## API Documentation
+
+### Search Endpoint
+
+```http
+GET /api/v1/search
+```
+
+**Parameters:**
+
+| Parameter | Type      | Required | Description                          |
+| --------- | --------- | -------- | ------------------------------------ |
+| q         | string    | Yes      | Search query                         |
+| fields    | string\[] | No       | Fields to search in                  |
+| databases | string\[] | No       | Target databases                     |
+| limit     | int       | No       | Results per page (default: 10)       |
+| offset    | int       | No       | Pagination offset (default: 0)       |
+| highlight | bool      | No       | Enable highlighting (default: false) |
+
+**Response:**
+
+```json
+{
+  "took": 15,
+  "total": 1245,
+  "hits": [
+    {
+      "score": 0.95,
+      "table": "documents",
+      "id": "doc_123",
+      "fields": {
+        "title": "人工智能技术发展",
+        "content": "AI技术正在快速发展..."
+      },
+      "highlight": {
+        "title": ["<em>人工智能</em>技术发展"]
+      }
+    }
+  ]
+}
+```
+
+## Development
+
+### Building from Source
+
+```bash
+# Install dependencies
+go mod download
+
+# Run tests
+make test
+
+# Build binary
+make build
+
+# Run locally
+make run
+```
+
+### Testing
+
+```bash
+# Unit tests
+go test ./...
+
+# Integration tests
+make test-integration
+
+# Benchmark tests
+make benchmark
+```
+
+## Contributing
+
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+
+### Development Setup
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/amazing-feature`
+3. Commit your changes: `git commit -m 'Add amazing feature'`
+4. Push to the branch: `git push origin feature/amazing-feature`
+5. Open a Pull Request
+
+### Code Standards
+
+* Follow Go best practices and [Effective Go](https://golang.org/doc/effective_go.html)
+* Write comprehensive tests for new features
+* Update documentation for API changes
+* Use conventional commit messages
+
+## License
+
+This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
+
+## Support
+
+* **Issues**: [GitHub Issues](https://github.com/turtacn/starseek/issues)
+* **Discussions**: [GitHub Discussions](https://github.com/turtacn/starseek/discussions)
+* **Documentation**: [docs/](docs/)
+
+## Roadmap
+
+* [ ] Vector search integration
+* [ ] Real-time index updates
+* [ ] Multi-tenant support
+* [ ] Kubernetes operator
+* [ ] Web UI dashboard
 
 ---
 
-[中文版 README-zh.md](README-zh.md)
+⭐ If you find StarSeek helpful, please give us a star on GitHub!

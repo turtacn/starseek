@@ -1,266 +1,297 @@
-# StarSeek: 面向数仓与数据湖的统一全文检索中台服务
+# StarSeek
 
-## 🌟 项目简介
+面向现代数据仓库和数据湖的高性能企业级全文检索中台服务，主要支持 StarRocks、ClickHouse 和 Apache Doris。
 
-StarSeek 是一个创新的开源中台服务，旨在为 StarRocks、Apache Doris 和 ClickHouse 等列式分析型数据库赋能，提供类似 Elasticsearch 的高级全文检索能力。通过充分利用这些 OLAP 数据库底层的倒排索引特性，StarSeek 构建了一个统一、智能且高度可扩展的搜索服务层，显著增强了它们在文档检索、内容搜索和复杂数据探索方面的效用。
+[English Documentation](README.md) | [架构文档](docs/architecture.md)
 
-本项目旨在解决分析型数据库在处理复杂全文检索需求时的固有局限性，将其转变为强大的搜索后端，同时避免了维护一个独立搜索集群的额外开销。
+## 项目概述
 
-## 🎯 核心痛点与核心价值
+StarSeek 通过提供统一的全文检索层，弥合了传统 OLAP 数据库与现代搜索需求之间的鸿沟。它充分利用底层数据仓库的倒排索引，同时增加了排名、高亮显示和跨表查询等高级搜索功能。
 
-### 解决的痛点
+### 核心痛点解决
 
-*   **原生全文检索能力有限**: 尽管 StarRocks、Doris 和 ClickHouse 提供了基础的倒排索引功能，但它们缺乏高级搜索特性，如跨表/跨列查询、相关度评分（TF-IDF/BM25）、同义词扩展、结果高亮显示以及统一的元数据管理。
-*   **开发与维护复杂**: 开发者常常需要手动构建复杂的 SQL 查询（例如 `MATCH_AGAINST`、`UNION ALL`），处理分词一致性，并在应用层实现排名逻辑，这导致了开发复杂性增加和效率降低。
-*   **用户体验不佳**: 最终用户常常面临搜索结果不够精确，且缺乏现代搜索应用中常见的先进交互式搜索功能。
-*   **数据源耦合**: 应用程序与底层分析型数据库的特定 SQL 方言和索引机制紧密耦合，阻碍了灵活性和未来的迁移。
+- **搜索体验碎片化**：不同表和列的倒排索引分散在各个数据库中
+- **搜索能力受限**：OLAP 数据库缺乏相关性评分和高亮显示等高级搜索功能
+- **性能瓶颈**：大型 UNION ALL 查询导致性能下降
+- **维护复杂性**：跨多表手动管理搜索元数据
 
 ### 核心价值主张
 
-*   **统一搜索入口**: StarSeek 为您在分析型数据存储上的所有全文检索操作提供一个统一、标准化的 API 端点，简化了客户端集成。
-*   **功能增强**: 它弥补了底层数据库的功能空白，引入了类似 Elasticsearch 的丰富搜索能力，例如：
-    *   **统一索引元数据管理**: 集中注册和管理多表、多数据库中所有已索引列的元数据。
-    *   **高级查询处理**: 支持自然语言查询、多字段搜索（如 `title:关键词 AND content:另一个`）、同义词扩展，以及智能地将查询转换为优化的 SQL。
-    *   **模拟相关度排名**: 在服务端实现类似 TF-IDF/BM25 的评分机制，提供高度相关的搜索结果。
-    *   **高亮与分页**: 提供了丰富的用户搜索体验所必需的功能。
-    *   **跨表/跨列搜索**: 通过一个查询无缝地在多个表和列中进行搜索。
-*   **提升开发者效率**: 抽象了复杂的 SQL 生成、分词和排名逻辑，使开发者能够专注于应用业务逻辑。
-*   **数据源无关性**: 提供了一个适配器层，以支持 StarRocks、Apache Doris 和 ClickHouse 作为主要后端，并以 StarRocks 为核心焦点。
-*   **性能优化**: 集成了缓存机制（例如 Redis 用于热门关键词）和并发查询执行管理，以优化搜索性能。
+- **统一搜索接口**：多表、多列全文检索的单一 API 端点
+- **高级搜索功能**：TF-IDF 评分、分页、高亮显示、同义词扩展
+- **高性能**：位图优化、Redis 缓存和并发查询执行
+- **多数据库支持**：StarRocks（主要）、ClickHouse 和 Apache Doris 兼容
+- **企业就绪**：内置可观测性、错误处理和水平扩展能力
 
-## ✨ 主要功能特性
+## 功能特性
 
-*   **索引注册服务 (Index Registry)**:
-    *   集中管理已索引列的元数据（表名、列名、索引类型、分词器、数据类型）。
-    *   支持多种索引类型：英文、中文、多语言、不分词。
-*   **查询处理引擎 (Query Processing Engine)**:
-    *   将自然语言查询转换为优化的 SQL。
-    *   集成多语言分词（与 StarRocks 索引分词保持一致）。
-    *   可选的同义词扩展。
-    *   支持字段筛选和布尔逻辑（`field:keyword`）。
-    *   模拟关键词打分机制用于排名。
-    *   自动生成跨表 SQL 查询。
-*   **查询优化模块 (Query Optimization Module)**:
-    *   对热门关键词的查询结果进行缓存（例如，使用 Redis）。
-    *   可能对结果集进行缓存以加速后续请求。
-    *   充分利用底层数据库的列式存储优化。
-*   **排名模块 (Elasticsearch 模拟)**:
-    *   在服务端计算伪 TF-IDF/BM25 分数。
-    *   根据文本内容计算词频（Term Frequency, TF）。
-    *   根据预计算的统计数据计算逆文档频率（Inverse Document Frequency, IDF）。
-*   **任务调度与并发控制**:
-    *   管理并发 SQL 执行任务，防止数据库过载。
-    *   可配置的并发度限制。
-*   **多数据库支持**:
-    *   采用可扩展的适配器模式，主要支持 StarRocks、Apache Doris 和 ClickHouse 作为后端，以 StarRocks 为核心。
+### 核心能力
 
-## 🏛️ 架构概览
+- **索引注册表管理**：所有倒排索引的集中式元数据管理
+- **多语言支持**：中文/英文/多语言分词，匹配数据库策略
+- **跨表搜索**：同时查询多个表和列
+- **高级排名**：TF-IDF 和类 BM25 评分算法
+- **查询优化**：位图过滤、结果缓存和热词预加载
+- **并发处理**：带流控的任务调度，避免大型 SQL 联合查询
 
-StarSeek 的详细架构，包括其分层设计、模块交互和部署考量，已在 `docs/architecture.md` 中详细阐述。
+### 搜索 API 示例
 
-[查看完整的架构设计文档](docs/architecture.md)
-
-## 🚀 构建与运行指南
-
-### 前置条件
-
-*   Go (版本 1.20.2 或更高)
-*   Git
-*   Docker (用于本地数据库设置，可选但推荐)
-*   StarRocks, Doris 或 ClickHouse 实例 (或 Docker 化设置)
-*   Redis 实例 (用于缓存)
-
-### 快速开始
-
-1.  **克隆仓库:**
-    ```bash
-    git clone https://github.com/turtacn/starseek.git
-    cd starseek
-    ```
-
-2.  **安装依赖:**
-    ```bash
-    go mod tidy
-    ```
-
-3.  **配置环境变量 (示例):**
-    创建 `.env` 文件或设置环境变量：
-    ```
-    STARSEEK_DB_TYPE=starrocks
-    STARSEEK_DB_HOST=localhost
-    STARSEEK_DB_PORT=9030
-    STARSEEK_DB_USER=root
-    STARSEEK_DB_PASSWORD=
-    STARSEEK_DB_NAME=your_database
-    STARSEEK_REDIS_ADDR=localhost:6379
-    STARSEEK_LISTEN_ADDR=:8080
-    STARSEEK_LOG_LEVEL=info
-    # 更多配置将在 docs/configuration.md 中详细说明
-    ```
-
-4.  **构建应用程序:**
-    ```bash
-    go build -o starseek ./cmd/starseek/main.go
-    ```
-
-5.  **运行应用程序:**
-    ```bash
-    ./starseek
-    ```
-    服务将在配置的地址（例如 `http://localhost:8080`）上监听。
-
-### Docker 设置 (StarRocks 示例)
-
-为了开发和测试，您可以使用 Docker Compose 启动一个 StarRocks 实例。
 ```bash
-# 示例 docker-compose.yml (简化)
-version: '3.8'
-services:
-  starrocks-fe:
-    image: starrocks/starrocks:latest
-    ports:
-      - "9030:9030" # FE 查询端口
-      - "8030:8030" # HTTP 端口
-    environment:
-      - FE_SERVERS="127.0.0.1:9030"
-    command: ["/opt/starrocks/bin/start_fe.sh"]
-  redis:
-    image: redis:6-alpine
-    ports:
-      - "6379:6379"
+# 跨多字段基本搜索
+GET /api/v1/search?q=人工智能&fields=title,content&limit=10&offset=0
+
+# 高级字段特定搜索
+GET /api/v1/search?q=title:技术 AND content:创新&highlight=true
+
+# 多数据库搜索
+GET /api/v1/search?q=machine learning&databases=starrocks,clickhouse
 ````
 
-运行：`docker-compose up -d`
-
-## 🧪 代码片段与能力展示
-
-### 1. 索引注册 (API 端点)
-
-注册表的倒排索引列。这通常通过管理 API 完成。
+### Go SDK 示例
 
 ```go
-// 内部服务可能如何与索引注册中心交互的示例
-// (实际 API 可能是 HTTP POST 到 /api/v1/indexes/register)
 package main
 
 import (
-	"context"
-	"fmt"
-	"github.com/turtacn/starseek/internal/application"
-	"github.com/turtacn/starseek/internal/common/types/enum"
-	"github.com/turtacn/starseek/internal/domain/index"
-	"github.com/turtacn/starseek/internal/infrastructure/persistence/inmemory"
-	"github.com/turtacn/starseek/internal/infrastructure/logger"
+    "context"
+    "fmt"
+    "log"
+    
+    "github.com/turtacn/starseek/pkg/client"
 )
 
 func main() {
-	// 初始化日志器
-	l := logger.NewZapLogger()
-	// 演示使用内存存储；实际持久化将使用数据库
-	repo := inmemory.NewIndexMetadataRepository()
-	service := application.NewIndexService(repo, l)
-
-	ctx := context.Background()
-
-	// 注册文档标题列
-	err := service.RegisterIndex(ctx, index.RegisterIndexCommand{
-		TableName:   "documents",
-		ColumnName:  "title",
-		IndexType:   enum.IndexTypeChinese,
-		Tokenizer:   "jieba",
-		DataType:    "VARCHAR",
-		Description: "用于全文检索的文档标题",
-	})
-	if err != nil {
-		fmt.Printf("注册 documents.title 索引失败: %v\n", err)
-	} else {
-		fmt.Println("成功注册 documents.title 索引")
-	}
-
-	// 注册产品描述列
-	err = service.RegisterIndex(ctx, index.RegisterIndexCommand{
-		TableName:   "products",
-		ColumnName:  "description",
-		IndexType:   enum.IndexTypeEnglish,
-		Tokenizer:   "standard",
-		DataType:    "TEXT",
-		Description: "用于全文检索的产品描述",
-	})
-	if err != nil {
-		fmt.Printf("注册 products.description 索引失败: %v\n", err)
-	} else {
-		fmt.Println("成功注册 products.description 索引")
-	}
-
-	// 列出所有已注册索引的示例
-	allIndexes, err := service.ListIndexes(ctx, index.ListIndexesQuery{})
-	if err != nil {
-		fmt.Printf("列出索引失败: %v\n", err)
-	} else {
-		fmt.Println("\n已注册索引:")
-		for _, idx := range allIndexes {
-			fmt.Printf("- 表: %s, 列: %s, 类型: %s, 分词器: %s\n",
-				idx.TableName, idx.ColumnName, idx.IndexType.String(), idx.Tokenizer)
-		}
-	}
+    // 初始化 StarSeek 客户端
+    client := starseek.NewClient(&starseek.Config{
+        Endpoint: "http://localhost:8080",
+        APIKey:   "your-api-key",
+    })
+    
+    // 执行搜索
+    ctx := context.Background()
+    result, err := client.Search(ctx, &starseek.SearchRequest{
+        Query:     "人工智能",
+        Fields:    []string{"title", "content"},
+        Limit:     10,
+        Highlight: true,
+    })
+    
+    if err != nil {
+        log.Fatal(err)
+    }
+    
+    fmt.Printf("找到 %d 个结果，耗时 %dms\n", result.Total, result.Took)
+    for _, hit := range result.Hits {
+        fmt.Printf("评分: %.2f, 表: %s, ID: %s\n", 
+            hit.Score, hit.Table, hit.ID)
+    }
 }
 ```
 
-### 2. 跨表全文检索 (HTTP API 示例)
+## 架构概览
 
-通过 `curl` 命令模拟搜索请求。StarSeek 服务将处理此请求。
+StarSeek 遵循分层架构，职责分离清晰：
 
-```bash
-# 在 'documents' 和 'articles' 表的 'title' 和 'content' 字段中搜索 "人工智能"
-# 请求可能类似于:
-curl -X GET "http://localhost:8080/api/v1/search?q=人工智能&fields=title,content&tables=documents,articles&page=1&pageSize=10" \
-     -H "Content-Type: application/json"
-
-# 示例响应 (简化):
-# {
-#   "query": "人工智能",
-#   "results": [
-#     {
-#       "table": "documents",
-#       "rowId": "doc_123",
-#       "score": 0.85,
-#       "highlight": {
-#         "title": "关于<B>人工智能</B>在教育领域的应用",
-#         "content": "近年来，<B>人工智能</B>技术飞速发展..."
-#       },
-#       "data": { /* 原始行数据 */ }
-#     },
-#     {
-#       "table": "articles",
-#       "rowId": "art_456",
-#       "score": 0.72,
-#       "highlight": {
-#         "content": "深度学习是<B>人工智能</B>的核心分支..."
-#       },
-#       "data": { /* 原始行数据 */ }
-#     }
-#   ],
-#   "totalHits": 250,
-#   "currentPage": 1,
-#   "pageSize": 10
-# }
+```mermaid
+graph TB
+    subgraph API[API 层]
+        REST[REST API]
+        SDK[Go SDK]
+    end
+    
+    subgraph APP[应用层]
+        QP[查询处理器]
+        RM[排名模块]
+        TS[任务调度器]
+    end
+    
+    subgraph CORE[核心层]
+        IR[索引注册表]
+        QO[查询优化器]
+        CM[缓存管理器]
+    end
+    
+    subgraph INFRA[基础设施层]
+        SR[StarRocks]
+        CH[ClickHouse]
+        DR[Doris]
+        RD[Redis]
+    end
+    
+    API --> APP
+    APP --> CORE
+    CORE --> INFRA
 ```
 
-### 3. 特定字段搜索
+详细架构信息请参阅[架构文档](docs/architecture.md)。
+
+## 快速开始
+
+### 前置要求
+
+* Go 1.20.2+
+* Redis 6.0+
+* 以下之一：StarRocks 3.0+、ClickHouse 22.0+、Apache Doris 2.0+
+
+### 安装
 
 ```bash
-# 在 'documents' 表中，在 'title' 字段搜索 "starrocks"，在 'content' 字段搜索 "performance"
-curl -X GET "http://localhost:8080/api/v1/search?q=title:starrocks AND content:performance&tables=documents&page=1&pageSize=5" \
-     -H "Content-Type: application/json"
+# 克隆仓库
+git clone https://github.com/turtacn/starseek.git
+cd starseek
+
+# 构建项目
+make build
+
+# 使用默认配置运行
+./bin/starseek server --config config/server.yaml
 ```
 
-## 🤝 贡献指南
+### 配置
 
-我们欢迎社区贡献！如果您有兴趣改进 StarSeek，请查阅我们的：
+```yaml
+# config/server.yaml
+server:
+  host: "0.0.0.0"
+  port: 8080
+  
+databases:
+  starrocks:
+    host: "localhost"
+    port: 9030
+    username: "root"
+    password: ""
+    
+redis:
+  host: "localhost"
+  port: 6379
+  
+logging:
+  level: "info"
+  format: "json"
+```
 
-* [贡献指南](CONTRIBUTING.md)
-* [行为准则](CODE_OF_CONDUCT.md)
+### Docker 部署
+
+```bash
+# 使用 Docker Compose
+docker-compose up -d
+
+# 或手动构建和运行
+docker build -t starseek:latest .
+docker run -p 8080:8080 -v $(pwd)/config:/app/config starseek:latest
+```
+
+## API 文档
+
+### 搜索端点
+
+```http
+GET /api/v1/search
+```
+
+**参数:**
+
+| 参数        | 类型        | 必需 | 描述             |
+| --------- | --------- | -- | -------------- |
+| q         | string    | 是  | 搜索查询           |
+| fields    | string\[] | 否  | 搜索字段           |
+| databases | string\[] | 否  | 目标数据库          |
+| limit     | int       | 否  | 每页结果数（默认：10）   |
+| offset    | int       | 否  | 分页偏移（默认：0）     |
+| highlight | bool      | 否  | 启用高亮（默认：false） |
+
+**响应:**
+
+```json
+{
+  "took": 15,
+  "total": 1245,
+  "hits": [
+    {
+      "score": 0.95,
+      "table": "documents",
+      "id": "doc_123",
+      "fields": {
+        "title": "人工智能技术发展",
+        "content": "AI技术正在快速发展..."
+      },
+      "highlight": {
+        "title": ["<em>人工智能</em>技术发展"]
+      }
+    }
+  ]
+}
+```
+
+## 开发
+
+### 从源码构建
+
+```bash
+# 安装依赖
+go mod download
+
+# 运行测试
+make test
+
+# 构建二进制文件
+make build
+
+# 本地运行
+make run
+```
+
+### 测试
+
+```bash
+# 单元测试
+go test ./...
+
+# 集成测试
+make test-integration
+
+# 基准测试
+make benchmark
+```
+
+## 贡献
+
+我们欢迎贡献！详情请参阅[贡献指南](CONTRIBUTING.md)。
+
+### 开发环境设置
+
+1. Fork 仓库
+2. 创建功能分支：`git checkout -b feature/amazing-feature`
+3. 提交更改：`git commit -m 'Add amazing feature'`
+4. 推送到分支：`git push origin feature/amazing-feature`
+5. 打开 Pull Request
+
+### 代码标准
+
+* 遵循 Go 最佳实践和[Effective Go](https://golang.org/doc/effective_go.html)
+* 为新功能编写全面的测试
+* 为 API 变更更新文档
+* 使用约定式提交消息
+
+## 许可证
+
+本项目基于 Apache License 2.0 许可证 - 详情请参阅[LICENSE](LICENSE)文件。
+
+## 支持
+
+* **问题反馈**：[GitHub Issues](https://github.com/turtacn/starseek/issues)
+* **讨论**：[GitHub Discussions](https://github.com/turtacn/starseek/discussions)
+* **文档**：[docs/](docs/)
+
+## 路线图
+
+* [ ] 向量搜索集成
+* [ ] 实时索引更新
+* [ ] 多租户支持
+* [ ] Kubernetes operator
+* [ ] Web UI 仪表板
 
 ---
 
-[English Version README.md](README.md)
+⭐ 如果您觉得 StarSeek 有用，请在 GitHub 上给我们一个星标！
