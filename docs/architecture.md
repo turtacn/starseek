@@ -563,9 +563,9 @@ graph LR
 
 ## 参考资料
 
-\[1] StarRocks Official Documentation. [https://docs.starrocks.io/](https://docs.starrocks.io/)
-\[2] ClickHouse Documentation. [https://clickhouse.com/docs/](https://clickhouse.com/docs/)
-\[3] Apache Doris Documentation. [https://doris.apache.org/docs/](https://doris.apache.org/docs/)
-\[4] Elasticsearch Guide. [https://www.elastic.co/guide/](https://www.elastic.co/guide/)
-\[5] Domain-Driven Design: Tackling Complexity in the Heart of Software. Eric Evans.
-\[6] Building Microservices: Designing Fine-Grained Systems. Sam Newman.
+* [1] StarRocks Official Documentation. [https://docs.starrocks.io/](https://docs.starrocks.io/)
+* [2] ClickHouse Documentation. [https://clickhouse.com/docs/](https://clickhouse.com/docs/)
+* [3] Apache Doris Documentation. [https://doris.apache.org/docs/](https://doris.apache.org/docs/)
+* [4] Elasticsearch Guide. [https://www.elastic.co/guide/](https://www.elastic.co/guide/)
+* [5] Domain-Driven Design: Tackling Complexity in the Heart of Software. Eric Evans.
+* [6] Building Microservices: Designing Fine-Grained Systems. Sam Newman.
