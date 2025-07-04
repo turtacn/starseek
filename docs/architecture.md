@@ -256,7 +256,7 @@ graph LR
     subgraph IDF[逆文档频率（Inverse Document Frequency）]
         IDF1[文档总数<br/>（Total Documents）]
         IDF2[包含词的文档数<br/>（Documents with Term）]
-        IDF3[IDF值计算<br/>IDF = log(N/df)]
+        IDF3[IDF值计算<br/>IDF = log（N/df）]
     end
     
     subgraph SCORE[相关度评分（Relevance Score）]
