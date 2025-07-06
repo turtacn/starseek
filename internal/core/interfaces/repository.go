@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/your-project/internal/core/domain"
+	"github.com/turtacn/starseek/internal/core/domain"
 )
 
 // SearchRepository 定义搜索数据存储操作接口
@@ -176,26 +176,26 @@ type CacheTransaction interface {
 
 // SearchQuery 搜索查询结构
 type SearchQuery struct {
-	Index       string                 `json:"index"`
-	Query       string                 `json:"query"`
-	Filters     map[string]interface{} `json:"filters,omitempty"`
-	SortBy      []SortField            `json:"sort_by,omitempty"`
-	From        int                    `json:"from,omitempty"`
-	Size        int                    `json:"size,omitempty"`
-	Highlight   *HighlightConfig       `json:"highlight,omitempty"`
+	Index        string                  `json:"index"`
+	Query        string                  `json:"query"`
+	Filters      map[string]interface{}  `json:"filters,omitempty"`
+	SortBy       []SortField             `json:"sort_by,omitempty"`
+	From         int                     `json:"from,omitempty"`
+	Size         int                     `json:"size,omitempty"`
+	Highlight    *HighlightConfig        `json:"highlight,omitempty"`
 	Aggregations map[string]*Aggregation `json:"aggregations,omitempty"`
-	Source      []string               `json:"source,omitempty"`
-	Timeout     time.Duration          `json:"timeout,omitempty"`
+	Source       []string                `json:"source,omitempty"`
+	Timeout      time.Duration           `json:"timeout,omitempty"`
 }
 
 // SearchResults 搜索结果结构
 type SearchResults struct {
-	Total        int64                        `json:"total"`
-	MaxScore     float64                     `json:"max_score"`
-	Documents    []*SearchDocument           `json:"documents"`
+	Total        int64                         `json:"total"`
+	MaxScore     float64                       `json:"max_score"`
+	Documents    []*SearchDocument             `json:"documents"`
 	Aggregations map[string]*AggregationResult `json:"aggregations,omitempty"`
-	ScrollID     string                      `json:"scroll_id,omitempty"`
-	Took         time.Duration               `json:"took"`
+	ScrollID     string                        `json:"scroll_id,omitempty"`
+	Took         time.Duration                 `json:"took"`
 }
 
 // ScrollResults 滚动搜索结果
@@ -230,28 +230,28 @@ type HighlightConfig struct {
 
 // HighlightField 高亮字段配置
 type HighlightField struct {
-	FragmentSize   int      `json:"fragment_size,omitempty"`
-	NumberOfFragments int   `json:"number_of_fragments,omitempty"`
-	PreTags        []string `json:"pre_tags,omitempty"`
-	PostTags       []string `json:"post_tags,omitempty"`
+	FragmentSize      int      `json:"fragment_size,omitempty"`
+	NumberOfFragments int      `json:"number_of_fragments,omitempty"`
+	PreTags           []string `json:"pre_tags,omitempty"`
+	PostTags          []string `json:"post_tags,omitempty"`
 }
 
 // Aggregation 聚合查询
 type Aggregation struct {
-	Type   AggregationType            `json:"type"`
-	Field  string                     `json:"field,omitempty"`
-	Size   int                        `json:"size,omitempty"`
-	Config map[string]interface{}     `json:"config,omitempty"`
-	SubAggs map[string]*Aggregation   `json:"sub_aggregations,omitempty"`
+	Type    AggregationType         `json:"type"`
+	Field   string                  `json:"field,omitempty"`
+	Size    int                     `json:"size,omitempty"`
+	Config  map[string]interface{}  `json:"config,omitempty"`
+	SubAggs map[string]*Aggregation `json:"sub_aggregations,omitempty"`
 }
 
 // AggregationQuery 聚合查询结构
 type AggregationQuery struct {
-	Index        string                    `json:"index"`
-	Query        string                    `json:"query,omitempty"`
-	Filters      map[string]interface{}    `json:"filters,omitempty"`
-	Aggregations map[string]*Aggregation   `json:"aggregations"`
-	Timeout      time.Duration             `json:"timeout,omitempty"`
+	Index        string                  `json:"index"`
+	Query        string                  `json:"query,omitempty"`
+	Filters      map[string]interface{}  `json:"filters,omitempty"`
+	Aggregations map[string]*Aggregation `json:"aggregations"`
+	Timeout      time.Duration           `json:"timeout,omitempty"`
 }
 
 // AggregationResults 聚合结果
@@ -262,7 +262,7 @@ type AggregationResults struct {
 
 // AggregationResult 聚合结果项
 type AggregationResult struct {
-	Type    AggregationType                `json:"type"`
+	Type    AggregationType               `json:"type"`
 	Buckets []*AggregationBucket          `json:"buckets,omitempty"`
 	Value   interface{}                   `json:"value,omitempty"`
 	SubAggs map[string]*AggregationResult `json:"sub_aggregations,omitempty"`
@@ -270,25 +270,25 @@ type AggregationResult struct {
 
 // AggregationBucket 聚合桶
 type AggregationBucket struct {
-	Key     interface{}                   `json:"key"`
-	DocCount int64                        `json:"doc_count"`
-	SubAggs map[string]*AggregationResult `json:"sub_aggregations,omitempty"`
+	Key      interface{}                   `json:"key"`
+	DocCount int64                         `json:"doc_count"`
+	SubAggs  map[string]*AggregationResult `json:"sub_aggregations,omitempty"`
 }
 
 // BulkOperation 批量操作
 type BulkOperation struct {
-	Type      BulkOperationType      `json:"type"`
-	Index     string                 `json:"index"`
-	ID        string                 `json:"id,omitempty"`
-	Document  *domain.Document       `json:"document,omitempty"`
-	Metadata  map[string]interface{} `json:"metadata,omitempty"`
+	Type     BulkOperationType      `json:"type"`
+	Index    string                 `json:"index"`
+	ID       string                 `json:"id,omitempty"`
+	Document *domain.Document       `json:"document,omitempty"`
+	Metadata map[string]interface{} `json:"metadata,omitempty"`
 }
 
 // BulkResponse 批量操作响应
 type BulkResponse struct {
-	Took     time.Duration      `json:"took"`
-	Errors   bool               `json:"errors"`
-	Items    []*BulkResponseItem `json:"items"`
+	Took   time.Duration       `json:"took"`
+	Errors bool                `json:"errors"`
+	Items  []*BulkResponseItem `json:"items"`
 }
 
 // BulkResponseItem 批量操作响应项
@@ -302,7 +302,7 @@ type BulkResponseItem struct {
 
 // IndexConfiguration 索引配置
 type IndexConfiguration struct {
-	Name     string        `json:"name"`
+	Name     string         `json:"name"`
 	Settings *IndexSettings `json:"settings"`
 	Mappings *IndexMapping  `json:"mappings"`
 	Aliases  []string       `json:"aliases,omitempty"`
@@ -311,39 +311,39 @@ type IndexConfiguration struct {
 // IndexInfo 索引信息
 type IndexInfo struct {
 	Name      string                 `json:"name"`
-	Status    IndexStatus           `json:"status"`
-	Health    IndexHealth           `json:"health"`
-	Primary   int                   `json:"primary"`
-	Replicas  int                   `json:"replicas"`
-	DocsCount int64                 `json:"docs_count"`
-	StoreSize int64                 `json:"store_size"`
-	CreatedAt time.Time             `json:"created_at"`
-	UpdatedAt time.Time             `json:"updated_at"`
+	Status    IndexStatus            `json:"status"`
+	Health    IndexHealth            `json:"health"`
+	Primary   int                    `json:"primary"`
+	Replicas  int                    `json:"replicas"`
+	DocsCount int64                  `json:"docs_count"`
+	StoreSize int64                  `json:"store_size"`
+	CreatedAt time.Time              `json:"created_at"`
+	UpdatedAt time.Time              `json:"updated_at"`
 	Metadata  map[string]interface{} `json:"metadata,omitempty"`
 }
 
 // IndexFilter 索引过滤器
 type IndexFilter struct {
-	Names    []string      `json:"names,omitempty"`
-	Status   []IndexStatus `json:"status,omitempty"`
-	Health   []IndexHealth `json:"health,omitempty"`
-	Limit    int           `json:"limit,omitempty"`
-	Offset   int           `json:"offset,omitempty"`
+	Names  []string      `json:"names,omitempty"`
+	Status []IndexStatus `json:"status,omitempty"`
+	Health []IndexHealth `json:"health,omitempty"`
+	Limit  int           `json:"limit,omitempty"`
+	Offset int           `json:"offset,omitempty"`
 }
 
 // IndexStatistics 索引统计信息
 type IndexStatistics struct {
-	DocsCount     int64                  `json:"docs_count"`
-	DocsDeleted   int64                  `json:"docs_deleted"`
-	StoreSize     int64                  `json:"store_size"`
-	IndexingTotal int64                  `json:"indexing_total"`
-	IndexingTime  time.Duration          `json:"indexing_time"`
-	SearchTotal   int64                  `json:"search_total"`
-	SearchTime    time.Duration          `json:"search_time"`
-	QueryCache    *CacheStatistics       `json:"query_cache,omitempty"`
-	FieldData     *FieldDataStatistics   `json:"field_data,omitempty"`
-	Segments      *SegmentStatistics     `json:"segments,omitempty"`
-	UpdatedAt     time.Time              `json:"updated_at"`
+	DocsCount     int64                `json:"docs_count"`
+	DocsDeleted   int64                `json:"docs_deleted"`
+	StoreSize     int64                `json:"store_size"`
+	IndexingTotal int64                `json:"indexing_total"`
+	IndexingTime  time.Duration        `json:"indexing_time"`
+	SearchTotal   int64                `json:"search_total"`
+	SearchTime    time.Duration        `json:"search_time"`
+	QueryCache    *CacheStatistics     `json:"query_cache,omitempty"`
+	FieldData     *FieldDataStatistics `json:"field_data,omitempty"`
+	Segments      *SegmentStatistics   `json:"segments,omitempty"`
+	UpdatedAt     time.Time            `json:"updated_at"`
 }
 
 // IndexMapping 索引映射
@@ -355,11 +355,11 @@ type IndexMapping struct {
 
 // FieldMapping 字段映射
 type FieldMapping struct {
-	Type       FieldType              `json:"type"`
-	Index      bool                   `json:"index,omitempty"`
-	Store      bool                   `json:"store,omitempty"`
-	Analyzer   string                 `json:"analyzer,omitempty"`
-	Format     string                 `json:"format,omitempty"`
+	Type       FieldType                `json:"type"`
+	Index      bool                     `json:"index,omitempty"`
+	Store      bool                     `json:"store,omitempty"`
+	Analyzer   string                   `json:"analyzer,omitempty"`
+	Format     string                   `json:"format,omitempty"`
 	Properties map[string]*FieldMapping `json:"properties,omitempty"`
 	Fields     map[string]*FieldMapping `json:"fields,omitempty"`
 }
@@ -416,29 +416,29 @@ type RoutingSettings struct {
 
 // IndexTemplate 索引模板
 type IndexTemplate struct {
-	Name         string             `json:"name"`
-	IndexPatterns []string          `json:"index_patterns"`
-	Settings     *IndexSettings     `json:"settings,omitempty"`
-	Mappings     *IndexMapping      `json:"mappings,omitempty"`
-	Aliases      map[string]interface{} `json:"aliases,omitempty"`
-	Priority     int                `json:"priority,omitempty"`
-	Version      int64              `json:"version,omitempty"`
-	Meta         map[string]interface{} `json:"_meta,omitempty"`
+	Name          string                 `json:"name"`
+	IndexPatterns []string               `json:"index_patterns"`
+	Settings      *IndexSettings         `json:"settings,omitempty"`
+	Mappings      *IndexMapping          `json:"mappings,omitempty"`
+	Aliases       map[string]interface{} `json:"aliases,omitempty"`
+	Priority      int                    `json:"priority,omitempty"`
+	Version       int64                  `json:"version,omitempty"`
+	Meta          map[string]interface{} `json:"_meta,omitempty"`
 }
 
 // CacheStats 缓存统计信息
 type CacheStats struct {
-	Hits            int64         `json:"hits"`
-	Misses          int64         `json:"misses"`
-	HitRate         float64       `json:"hit_rate"`
-	KeysCount       int64         `json:"keys_count"`
-	UsedMemory      int64         `json:"used_memory"`
-	MaxMemory       int64         `json:"max_memory"`
-	Evictions       int64         `json:"evictions"`
-	Connections     int           `json:"connections"`
-	CommandsTotal   int64         `json:"commands_total"`
-	CommandsPerSec  float64       `json:"commands_per_sec"`
-	UpdatedAt       time.Time     `json:"updated_at"`
+	Hits           int64     `json:"hits"`
+	Misses         int64     `json:"misses"`
+	HitRate        float64   `json:"hit_rate"`
+	KeysCount      int64     `json:"keys_count"`
+	UsedMemory     int64     `json:"used_memory"`
+	MaxMemory      int64     `json:"max_memory"`
+	Evictions      int64     `json:"evictions"`
+	Connections    int       `json:"connections"`
+	CommandsTotal  int64     `json:"commands_total"`
+	CommandsPerSec float64   `json:"commands_per_sec"`
+	UpdatedAt      time.Time `json:"updated_at"`
 }
 
 // CacheStatistics 缓存统计
@@ -463,22 +463,22 @@ type FieldDataStat struct {
 
 // SegmentStatistics 段统计
 type SegmentStatistics struct {
-	Count                int64 `json:"count"`
-	MemoryInBytes        int64 `json:"memory_in_bytes"`
-	TermsMemoryInBytes   int64 `json:"terms_memory_in_bytes"`
-	IndexWriterMemory    int64 `json:"index_writer_memory"`
-	VersionMapMemory     int64 `json:"version_map_memory"`
+	Count              int64 `json:"count"`
+	MemoryInBytes      int64 `json:"memory_in_bytes"`
+	TermsMemoryInBytes int64 `json:"terms_memory_in_bytes"`
+	IndexWriterMemory  int64 `json:"index_writer_memory"`
+	VersionMapMemory   int64 `json:"version_map_memory"`
 }
 
 // 枚举类型定义
 type (
-	SortOrder           string
-	AggregationType     string
-	BulkOperationType   string
-	IndexStatus         string
-	IndexHealth         string
-	DynamicMapping      string
-	FieldType          string
+	SortOrder         string
+	AggregationType   string
+	BulkOperationType string
+	IndexStatus       string
+	IndexHealth       string
+	DynamicMapping    string
+	FieldType         string
 )
 
 // SortOrder 常量
@@ -489,14 +489,14 @@ const (
 
 // AggregationType 常量
 const (
-	AggregationTypeTerms      AggregationType = "terms"
-	AggregationTypeHistogram  AggregationType = "histogram"
-	AggregationTypeRange      AggregationType = "range"
-	AggregationTypeSum        AggregationType = "sum"
-	AggregationTypeAvg        AggregationType = "avg"
-	AggregationTypeMax        AggregationType = "max"
-	AggregationTypeMin        AggregationType = "min"
-	AggregationTypeCount      AggregationType = "count"
+	AggregationTypeTerms       AggregationType = "terms"
+	AggregationTypeHistogram   AggregationType = "histogram"
+	AggregationTypeRange       AggregationType = "range"
+	AggregationTypeSum         AggregationType = "sum"
+	AggregationTypeAvg         AggregationType = "avg"
+	AggregationTypeMax         AggregationType = "max"
+	AggregationTypeMin         AggregationType = "min"
+	AggregationTypeCount       AggregationType = "count"
 	AggregationTypeCardinality AggregationType = "cardinality"
 )
 
@@ -510,8 +510,8 @@ const (
 
 // IndexStatus 常量
 const (
-	IndexStatusOpen   IndexStatus = "open"
-	IndexStatusClose  IndexStatus = "close"
+	IndexStatusOpen    IndexStatus = "open"
+	IndexStatusClose   IndexStatus = "close"
 	IndexStatusDeleted IndexStatus = "deleted"
 )
 

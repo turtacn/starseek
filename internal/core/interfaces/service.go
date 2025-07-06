@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/your-project/internal/core/domain"
+	"github.com/turtacn/starseek/internal/core/domain"
 )
 
 // SearchService 定义搜索业务逻辑接口
@@ -111,16 +111,16 @@ type TaskService interface {
 
 // SearchRequest 搜索请求结构
 type SearchRequest struct {
-	Query        string            `json:"query"`
-	Index        string            `json:"index"`
-	Filters      map[string]string `json:"filters,omitempty"`
-	SortBy       string            `json:"sort_by,omitempty"`
-	SortOrder    string            `json:"sort_order,omitempty"`
-	Offset       int               `json:"offset,omitempty"`
-	Limit        int               `json:"limit,omitempty"`
-	Highlight    bool              `json:"highlight,omitempty"`
-	UserID       string            `json:"user_id,omitempty"`
-	SearchMode   SearchMode        `json:"search_mode,omitempty"`
+	Query      string            `json:"query"`
+	Index      string            `json:"index"`
+	Filters    map[string]string `json:"filters,omitempty"`
+	SortBy     string            `json:"sort_by,omitempty"`
+	SortOrder  string            `json:"sort_order,omitempty"`
+	Offset     int               `json:"offset,omitempty"`
+	Limit      int               `json:"limit,omitempty"`
+	Highlight  bool              `json:"highlight,omitempty"`
+	UserID     string            `json:"user_id,omitempty"`
+	SearchMode SearchMode        `json:"search_mode,omitempty"`
 }
 
 // SearchResponse 搜索响应结构
@@ -134,13 +134,13 @@ type SearchResponse struct {
 
 // SearchResult 搜索结果结构
 type SearchResult struct {
-	DocumentID  string                 `json:"document_id"`
-	Title       string                 `json:"title"`
-	Content     string                 `json:"content"`
-	Score       float64                `json:"score"`
-	Highlights  map[string][]string    `json:"highlights,omitempty"`
-	Metadata    map[string]interface{} `json:"metadata,omitempty"`
-	Source      string                 `json:"source,omitempty"`
+	DocumentID string                 `json:"document_id"`
+	Title      string                 `json:"title"`
+	Content    string                 `json:"content"`
+	Score      float64                `json:"score"`
+	Highlights map[string][]string    `json:"highlights,omitempty"`
+	Metadata   map[string]interface{} `json:"metadata,omitempty"`
+	Source     string                 `json:"source,omitempty"`
 }
 
 // SearchRecord 搜索记录结构
@@ -167,14 +167,14 @@ type IndexConfig struct {
 
 // IndexMetadata 索引元数据结构
 type IndexMetadata struct {
-	Name         string            `json:"name"`
-	Type         IndexType         `json:"type"`
-	Status       IndexStatus       `json:"status"`
-	DocumentCount int64            `json:"document_count"`
-	Size         int64            `json:"size"`
-	CreatedAt    time.Time        `json:"created_at"`
-	UpdatedAt    time.Time        `json:"updated_at"`
-	Settings     map[string]string `json:"settings"`
+	Name          string            `json:"name"`
+	Type          IndexType         `json:"type"`
+	Status        IndexStatus       `json:"status"`
+	DocumentCount int64             `json:"document_count"`
+	Size          int64             `json:"size"`
+	CreatedAt     time.Time         `json:"created_at"`
+	UpdatedAt     time.Time         `json:"updated_at"`
+	Settings      map[string]string `json:"settings"`
 }
 
 // IndexStats 索引统计信息结构
@@ -213,8 +213,8 @@ type CustomScoreRequest struct {
 
 // RankingScore 排名评分结构
 type RankingScore struct {
-	DocumentID string            `json:"document_id"`
-	Score      float64           `json:"score"`
+	DocumentID string             `json:"document_id"`
+	Score      float64            `json:"score"`
 	Details    map[string]float64 `json:"details,omitempty"`
 }
 
@@ -234,31 +234,31 @@ type RankingModelConfig struct {
 
 // RankingEvaluationRequest 排名评估请求
 type RankingEvaluationRequest struct {
-	Query         string             `json:"query"`
-	Results       []*RankedDocument  `json:"results"`
-	RelevantDocs  []string          `json:"relevant_docs"`
-	Metrics       []EvaluationMetric `json:"metrics"`
+	Query        string             `json:"query"`
+	Results      []*RankedDocument  `json:"results"`
+	RelevantDocs []string           `json:"relevant_docs"`
+	Metrics      []EvaluationMetric `json:"metrics"`
 }
 
 // RankingEvaluation 排名评估结果
 type RankingEvaluation struct {
-	Precision    float64            `json:"precision"`
-	Recall       float64            `json:"recall"`
-	F1Score      float64            `json:"f1_score"`
-	NDCG         float64            `json:"ndcg"`
-	MAP          float64            `json:"map"`
-	Details      map[string]float64 `json:"details"`
+	Precision float64            `json:"precision"`
+	Recall    float64            `json:"recall"`
+	F1Score   float64            `json:"f1_score"`
+	NDCG      float64            `json:"ndcg"`
+	MAP       float64            `json:"map"`
+	Details   map[string]float64 `json:"details"`
 }
 
 // Task 任务结构
 type Task struct {
-	ID          string                 `json:"id"`
-	Type        TaskType               `json:"type"`
-	Parameters  map[string]interface{} `json:"parameters"`
-	Priority    TaskPriority           `json:"priority"`
-	Timeout     time.Duration          `json:"timeout"`
-	Retries     int                    `json:"retries"`
-	Metadata    map[string]string      `json:"metadata,omitempty"`
+	ID         string                 `json:"id"`
+	Type       TaskType               `json:"type"`
+	Parameters map[string]interface{} `json:"parameters"`
+	Priority   TaskPriority           `json:"priority"`
+	Timeout    time.Duration          `json:"timeout"`
+	Retries    int                    `json:"retries"`
+	Metadata   map[string]string      `json:"metadata,omitempty"`
 }
 
 // TaskResult 任务结果结构
@@ -275,11 +275,11 @@ type TaskResult struct {
 
 // TaskStatus 任务状态结构
 type TaskStatus struct {
-	ID       string           `json:"id"`
-	Status   TaskResultStatus `json:"status"`
-	Progress float64          `json:"progress"`
-	Message  string           `json:"message,omitempty"`
-	UpdatedAt time.Time       `json:"updated_at"`
+	ID        string           `json:"id"`
+	Status    TaskResultStatus `json:"status"`
+	Progress  float64          `json:"progress"`
+	Message   string           `json:"message,omitempty"`
+	UpdatedAt time.Time        `json:"updated_at"`
 }
 
 // TaskInfo 任务信息结构
@@ -321,22 +321,22 @@ type PeriodicTask struct {
 
 // 枚举类型定义
 type (
-	SearchMode         string
-	IndexType          string
-	IndexStatus        string
-	RankingAlgorithm   string
-	EvaluationMetric   string
-	TaskType           string
-	TaskPriority       string
-	TaskResultStatus   string
-	MergeStrategy      string
+	SearchMode       string
+	IndexType        string
+	IndexStatus      string
+	RankingAlgorithm string
+	EvaluationMetric string
+	TaskType         string
+	TaskPriority     string
+	TaskResultStatus string
+	MergeStrategy    string
 )
 
 // SearchMode 常量
 const (
-	SearchModeExact  SearchMode = "exact"
-	SearchModeFuzzy  SearchMode = "fuzzy"
-	SearchModePrefix SearchMode = "prefix"
+	SearchModeExact    SearchMode = "exact"
+	SearchModeFuzzy    SearchMode = "fuzzy"
+	SearchModePrefix   SearchMode = "prefix"
 	SearchModeWildcard SearchMode = "wildcard"
 )
 
@@ -350,10 +350,10 @@ const (
 
 // IndexStatus 常量
 const (
-	IndexStatusActive    IndexStatus = "active"
-	IndexStatusInactive  IndexStatus = "inactive"
+	IndexStatusActive     IndexStatus = "active"
+	IndexStatusInactive   IndexStatus = "inactive"
 	IndexStatusOptimizing IndexStatus = "optimizing"
-	IndexStatusError     IndexStatus = "error"
+	IndexStatusError      IndexStatus = "error"
 )
 
 // RankingAlgorithm 常量
@@ -374,12 +374,12 @@ const (
 
 // TaskType 常量
 const (
-	TaskTypeIndex     TaskType = "index"
-	TaskTypeSearch    TaskType = "search"
-	TaskTypeOptimize  TaskType = "optimize"
-	TaskTypeBackup    TaskType = "backup"
-	TaskTypeRestore   TaskType = "restore"
-	TaskTypeAnalyze   TaskType = "analyze"
+	TaskTypeIndex    TaskType = "index"
+	TaskTypeSearch   TaskType = "search"
+	TaskTypeOptimize TaskType = "optimize"
+	TaskTypeBackup   TaskType = "backup"
+	TaskTypeRestore  TaskType = "restore"
+	TaskTypeAnalyze  TaskType = "analyze"
 )
 
 // TaskPriority 常量
