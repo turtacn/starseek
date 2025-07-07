@@ -5,454 +5,307 @@ import (
 	"strings"
 )
 
-// DatabaseType represents different column-store database engine types
-type DatabaseType int
+// DatabaseType represents different database engine types
+type DatabaseType string
 
 const (
-	DatabaseTypeStarRocks DatabaseType = iota
-	DatabaseTypeClickHouse
-	DatabaseTypeDoris
+	DatabaseTypeStarRocks  DatabaseType = "STARROCKS"
+	DatabaseTypeClickHouse DatabaseType = "CLICKHOUSE"
+	DatabaseTypeDoris      DatabaseType = "DORIS"
 )
 
 // String returns the string representation of DatabaseType
 func (dt DatabaseType) String() string {
-	switch dt {
-	case DatabaseTypeStarRocks:
-		return "STARROCKS"
-	case DatabaseTypeClickHouse:
-		return "CLICKHOUSE"
-	case DatabaseTypeDoris:
-		return "DORIS"
-	default:
-		return "UNKNOWN"
-	}
+	return string(dt)
 }
 
-// IsValid checks if the DatabaseType is valid
+// IsValid validates if the database type is supported
 func (dt DatabaseType) IsValid() bool {
-	return dt >= DatabaseTypeStarRocks && dt <= DatabaseTypeDoris
+	switch dt {
+	case DatabaseTypeStarRocks, DatabaseTypeClickHouse, DatabaseTypeDoris:
+		return true
+	default:
+		return false
+	}
 }
 
-// ParseDatabaseType parses a string to DatabaseType
+// ParseDatabaseType parses string to DatabaseType
 func ParseDatabaseType(s string) (DatabaseType, error) {
-	switch strings.ToUpper(strings.TrimSpace(s)) {
-	case "STARROCKS":
-		return DatabaseTypeStarRocks, nil
-	case "CLICKHOUSE":
-		return DatabaseTypeClickHouse, nil
-	case "DORIS":
-		return DatabaseTypeDoris, nil
-	default:
-		return DatabaseType(-1), fmt.Errorf("invalid database type: %s", s)
+	dt := DatabaseType(strings.ToUpper(s))
+	if !dt.IsValid() {
+		return "", fmt.Errorf("invalid database type: %s", s)
 	}
+	return dt, nil
 }
 
 // IndexType represents different index technology types
-type IndexType int
+type IndexType string
 
 const (
-	IndexTypeInverted IndexType = iota
-	IndexTypeNGram
-	IndexTypeFullText
+	IndexTypeInverted IndexType = "INVERTED"
+	IndexTypeNgram    IndexType = "NGRAM"
+	IndexTypeFulltext IndexType = "FULLTEXT"
 )
 
 // String returns the string representation of IndexType
 func (it IndexType) String() string {
-	switch it {
-	case IndexTypeInverted:
-		return "INVERTED"
-	case IndexTypeNGram:
-		return "NGRAM"
-	case IndexTypeFullText:
-		return "FULLTEXT"
-	default:
-		return "UNKNOWN"
-	}
+	return string(it)
 }
 
-// IsValid checks if the IndexType is valid
+// IsValid validates if the index type is supported
 func (it IndexType) IsValid() bool {
-	return it >= IndexTypeInverted && it <= IndexTypeFullText
+	switch it {
+	case IndexTypeInverted, IndexTypeNgram, IndexTypeFulltext:
+		return true
+	default:
+		return false
+	}
 }
 
-// ParseIndexType parses a string to IndexType
+// ParseIndexType parses string to IndexType
 func ParseIndexType(s string) (IndexType, error) {
-	switch strings.ToUpper(strings.TrimSpace(s)) {
-	case "INVERTED":
-		return IndexTypeInverted, nil
-	case "NGRAM":
-		return IndexTypeNGram, nil
-	case "FULLTEXT":
-		return IndexTypeFullText, nil
-	default:
-		return IndexType(-1), fmt.Errorf("invalid index type: %s", s)
+	it := IndexType(strings.ToUpper(s))
+	if !it.IsValid() {
+		return "", fmt.Errorf("invalid index type: %s", s)
 	}
+	return it, nil
 }
 
 // TokenizerType represents different text tokenization strategies
-type TokenizerType int
+type TokenizerType string
 
 const (
-	TokenizerTypeChinese TokenizerType = iota
-	TokenizerTypeEnglish
-	TokenizerTypeMultilingual
-	TokenizerTypeNone
+	TokenizerTypeChinese      TokenizerType = "CHINESE"
+	TokenizerTypeEnglish      TokenizerType = "ENGLISH"
+	TokenizerTypeMultilingual TokenizerType = "MULTILINGUAL"
+	TokenizerTypeNone         TokenizerType = "NONE"
 )
 
 // String returns the string representation of TokenizerType
 func (tt TokenizerType) String() string {
-	switch tt {
-	case TokenizerTypeChinese:
-		return "CHINESE"
-	case TokenizerTypeEnglish:
-		return "ENGLISH"
-	case TokenizerTypeMultilingual:
-		return "MULTILINGUAL"
-	case TokenizerTypeNone:
-		return "NONE"
-	default:
-		return "UNKNOWN"
-	}
+	return string(tt)
 }
 
-// IsValid checks if the TokenizerType is valid
+// IsValid validates if the tokenizer type is supported
 func (tt TokenizerType) IsValid() bool {
-	return tt >= TokenizerTypeChinese && tt <= TokenizerTypeNone
+	switch tt {
+	case TokenizerTypeChinese, TokenizerTypeEnglish, TokenizerTypeMultilingual, TokenizerTypeNone:
+		return true
+	default:
+		return false
+	}
 }
 
-// ParseTokenizerType parses a string to TokenizerType
+// ParseTokenizerType parses string to TokenizerType
 func ParseTokenizerType(s string) (TokenizerType, error) {
-	switch strings.ToUpper(strings.TrimSpace(s)) {
-	case "CHINESE":
-		return TokenizerTypeChinese, nil
-	case "ENGLISH":
-		return TokenizerTypeEnglish, nil
-	case "MULTILINGUAL":
-		return TokenizerTypeMultilingual, nil
-	case "NONE":
-		return TokenizerTypeNone, nil
-	default:
-		return TokenizerType(-1), fmt.Errorf("invalid tokenizer type: %s", s)
+	tt := TokenizerType(strings.ToUpper(s))
+	if !tt.IsValid() {
+		return "", fmt.Errorf("invalid tokenizer type: %s", s)
 	}
+	return tt, nil
 }
 
 // QueryType represents different search query types
-type QueryType int
+type QueryType string
 
 const (
-	QueryTypeMatch QueryType = iota
-	QueryTypePhrase
-	QueryTypeFuzzy
-	QueryTypeBoolean
+	QueryTypeMatch   QueryType = "MATCH"
+	QueryTypePhrase  QueryType = "PHRASE"
+	QueryTypeFuzzy   QueryType = "FUZZY"
+	QueryTypeBoolean QueryType = "BOOLEAN"
 )
 
 // String returns the string representation of QueryType
 func (qt QueryType) String() string {
-	switch qt {
-	case QueryTypeMatch:
-		return "MATCH"
-	case QueryTypePhrase:
-		return "PHRASE"
-	case QueryTypeFuzzy:
-		return "FUZZY"
-	case QueryTypeBoolean:
-		return "BOOLEAN"
-	default:
-		return "UNKNOWN"
-	}
+	return string(qt)
 }
 
-// IsValid checks if the QueryType is valid
+// IsValid validates if the query type is supported
 func (qt QueryType) IsValid() bool {
-	return qt >= QueryTypeMatch && qt <= QueryTypeBoolean
+	switch qt {
+	case QueryTypeMatch, QueryTypePhrase, QueryTypeFuzzy, QueryTypeBoolean:
+		return true
+	default:
+		return false
+	}
 }
 
-// ParseQueryType parses a string to QueryType
+// ParseQueryType parses string to QueryType
 func ParseQueryType(s string) (QueryType, error) {
-	switch strings.ToUpper(strings.TrimSpace(s)) {
-	case "MATCH":
-		return QueryTypeMatch, nil
-	case "PHRASE":
-		return QueryTypePhrase, nil
-	case "FUZZY":
-		return QueryTypeFuzzy, nil
-	case "BOOLEAN":
-		return QueryTypeBoolean, nil
-	default:
-		return QueryType(-1), fmt.Errorf("invalid query type: %s", s)
+	qt := QueryType(strings.ToUpper(s))
+	if !qt.IsValid() {
+		return "", fmt.Errorf("invalid query type: %s", s)
 	}
+	return qt, nil
 }
 
 // RankingAlgorithm represents different relevance scoring algorithms
-type RankingAlgorithm int
+type RankingAlgorithm string
 
 const (
-	RankingAlgorithmTFIDF RankingAlgorithm = iota
-	RankingAlgorithmBM25
-	RankingAlgorithmCustom
+	RankingAlgorithmTFIDF  RankingAlgorithm = "TFIDF"
+	RankingAlgorithmBM25   RankingAlgorithm = "BM25"
+	RankingAlgorithmCustom RankingAlgorithm = "CUSTOM"
 )
 
 // String returns the string representation of RankingAlgorithm
 func (ra RankingAlgorithm) String() string {
-	switch ra {
-	case RankingAlgorithmTFIDF:
-		return "TFIDF"
-	case RankingAlgorithmBM25:
-		return "BM25"
-	case RankingAlgorithmCustom:
-		return "CUSTOM"
-	default:
-		return "UNKNOWN"
-	}
+	return string(ra)
 }
 
-// IsValid checks if the RankingAlgorithm is valid
+// IsValid validates if the ranking algorithm is supported
 func (ra RankingAlgorithm) IsValid() bool {
-	return ra >= RankingAlgorithmTFIDF && ra <= RankingAlgorithmCustom
+	switch ra {
+	case RankingAlgorithmTFIDF, RankingAlgorithmBM25, RankingAlgorithmCustom:
+		return true
+	default:
+		return false
+	}
 }
 
-// ParseRankingAlgorithm parses a string to RankingAlgorithm
+// ParseRankingAlgorithm parses string to RankingAlgorithm
 func ParseRankingAlgorithm(s string) (RankingAlgorithm, error) {
-	switch strings.ToUpper(strings.TrimSpace(s)) {
-	case "TFIDF":
-		return RankingAlgorithmTFIDF, nil
-	case "BM25":
-		return RankingAlgorithmBM25, nil
-	case "CUSTOM":
-		return RankingAlgorithmCustom, nil
-	default:
-		return RankingAlgorithm(-1), fmt.Errorf("invalid ranking algorithm: %s", s)
+	ra := RankingAlgorithm(strings.ToUpper(s))
+	if !ra.IsValid() {
+		return "", fmt.Errorf("invalid ranking algorithm: %s", s)
 	}
+	return ra, nil
 }
 
 // CacheType represents different cache storage types
-type CacheType int
+type CacheType string
 
 const (
-	CacheTypeMemory CacheType = iota
-	CacheTypeRedis
-	CacheTypeHybrid
+	CacheTypeMemory CacheType = "MEMORY"
+	CacheTypeRedis  CacheType = "REDIS"
+	CacheTypeHybrid CacheType = "HYBRID"
 )
 
 // String returns the string representation of CacheType
 func (ct CacheType) String() string {
-	switch ct {
-	case CacheTypeMemory:
-		return "MEMORY"
-	case CacheTypeRedis:
-		return "REDIS"
-	case CacheTypeHybrid:
-		return "HYBRID"
-	default:
-		return "UNKNOWN"
-	}
+	return string(ct)
 }
 
-// IsValid checks if the CacheType is valid
+// IsValid validates if the cache type is supported
 func (ct CacheType) IsValid() bool {
-	return ct >= CacheTypeMemory && ct <= CacheTypeHybrid
+	switch ct {
+	case CacheTypeMemory, CacheTypeRedis, CacheTypeHybrid:
+		return true
+	default:
+		return false
+	}
 }
 
-// ParseCacheType parses a string to CacheType
+// ParseCacheType parses string to CacheType
 func ParseCacheType(s string) (CacheType, error) {
-	switch strings.ToUpper(strings.TrimSpace(s)) {
-	case "MEMORY":
-		return CacheTypeMemory, nil
-	case "REDIS":
-		return CacheTypeRedis, nil
-	case "HYBRID":
-		return CacheTypeHybrid, nil
-	default:
-		return CacheType(-1), fmt.Errorf("invalid cache type: %s", s)
+	ct := CacheType(strings.ToUpper(s))
+	if !ct.IsValid() {
+		return "", fmt.Errorf("invalid cache type: %s", s)
 	}
+	return ct, nil
 }
 
-// Status represents general status values
-type Status int
+// LogLevel represents different log levels
+type LogLevel string
 
 const (
-	StatusUnknown Status = iota
-	StatusActive
-	StatusInactive
-	StatusPending
-	StatusFailed
-	StatusDeleted
-)
-
-// String returns the string representation of Status
-func (s Status) String() string {
-	switch s {
-	case StatusUnknown:
-		return "UNKNOWN"
-	case StatusActive:
-		return "ACTIVE"
-	case StatusInactive:
-		return "INACTIVE"
-	case StatusPending:
-		return "PENDING"
-	case StatusFailed:
-		return "FAILED"
-	case StatusDeleted:
-		return "DELETED"
-	default:
-		return "INVALID"
-	}
-}
-
-// IsValid checks if the Status is valid
-func (s Status) IsValid() bool {
-	return s >= StatusUnknown && s <= StatusDeleted
-}
-
-// ParseStatus parses a string to Status
-func ParseStatus(str string) (Status, error) {
-	switch strings.ToUpper(strings.TrimSpace(str)) {
-	case "UNKNOWN":
-		return StatusUnknown, nil
-	case "ACTIVE":
-		return StatusActive, nil
-	case "INACTIVE":
-		return StatusInactive, nil
-	case "PENDING":
-		return StatusPending, nil
-	case "FAILED":
-		return StatusFailed, nil
-	case "DELETED":
-		return StatusDeleted, nil
-	default:
-		return Status(-1), fmt.Errorf("invalid status: %s", str)
-	}
-}
-
-// LogLevel represents different logging levels
-type LogLevel int
-
-const (
-	LogLevelDebug LogLevel = iota
-	LogLevelInfo
-	LogLevelWarn
-	LogLevelError
-	LogLevelFatal
+	LogLevelDebug LogLevel = "DEBUG"
+	LogLevelInfo  LogLevel = "INFO"
+	LogLevelWarn  LogLevel = "WARN"
+	LogLevelError LogLevel = "ERROR"
+	LogLevelFatal LogLevel = "FATAL"
 )
 
 // String returns the string representation of LogLevel
 func (ll LogLevel) String() string {
-	switch ll {
-	case LogLevelDebug:
-		return "DEBUG"
-	case LogLevelInfo:
-		return "INFO"
-	case LogLevelWarn:
-		return "WARN"
-	case LogLevelError:
-		return "ERROR"
-	case LogLevelFatal:
-		return "FATAL"
-	default:
-		return "UNKNOWN"
-	}
+	return string(ll)
 }
 
-// IsValid checks if the LogLevel is valid
+// IsValid validates if the log level is supported
 func (ll LogLevel) IsValid() bool {
-	return ll >= LogLevelDebug && ll <= LogLevelFatal
-}
-
-// ParseLogLevel parses a string to LogLevel
-func ParseLogLevel(s string) (LogLevel, error) {
-	switch strings.ToUpper(strings.TrimSpace(s)) {
-	case "DEBUG":
-		return LogLevelDebug, nil
-	case "INFO":
-		return LogLevelInfo, nil
-	case "WARN":
-		return LogLevelWarn, nil
-	case "ERROR":
-		return LogLevelError, nil
-	case "FATAL":
-		return LogLevelFatal, nil
+	switch ll {
+	case LogLevelDebug, LogLevelInfo, LogLevelWarn, LogLevelError, LogLevelFatal:
+		return true
 	default:
-		return LogLevel(-1), fmt.Errorf("invalid log level: %s", s)
+		return false
 	}
 }
 
-// GetAllDatabaseTypes returns all valid database types
-func GetAllDatabaseTypes() []DatabaseType {
-	return []DatabaseType{
-		DatabaseTypeStarRocks,
-		DatabaseTypeClickHouse,
-		DatabaseTypeDoris,
+// ParseLogLevel parses string to LogLevel
+func ParseLogLevel(s string) (LogLevel, error) {
+	ll := LogLevel(strings.ToUpper(s))
+	if !ll.IsValid() {
+		return "", fmt.Errorf("invalid log level: %s", s)
+	}
+	return ll, nil
+}
+
+// ServiceStatus represents different service status types
+type ServiceStatus string
+
+const (
+	ServiceStatusHealthy   ServiceStatus = "HEALTHY"
+	ServiceStatusUnhealthy ServiceStatus = "UNHEALTHY"
+	ServiceStatusUnknown   ServiceStatus = "UNKNOWN"
+)
+
+// String returns the string representation of ServiceStatus
+func (ss ServiceStatus) String() string {
+	return string(ss)
+}
+
+// IsValid validates if the service status is supported
+func (ss ServiceStatus) IsValid() bool {
+	switch ss {
+	case ServiceStatusHealthy, ServiceStatusUnhealthy, ServiceStatusUnknown:
+		return true
+	default:
+		return false
 	}
 }
 
-// GetAllIndexTypes returns all valid index types
-func GetAllIndexTypes() []IndexType {
-	return []IndexType{
-		IndexTypeInverted,
-		IndexTypeNGram,
-		IndexTypeFullText,
+// ParseServiceStatus parses string to ServiceStatus
+func ParseServiceStatus(s string) (ServiceStatus, error) {
+	ss := ServiceStatus(strings.ToUpper(s))
+	if !ss.IsValid() {
+		return "", fmt.Errorf("invalid service status: %s", s)
+	}
+	return ss, nil
+}
+
+// TaskStatus represents different task execution status
+type TaskStatus string
+
+const (
+	TaskStatusPending   TaskStatus = "PENDING"
+	TaskStatusRunning   TaskStatus = "RUNNING"
+	TaskStatusCompleted TaskStatus = "COMPLETED"
+	TaskStatusFailed    TaskStatus = "FAILED"
+	TaskStatusCancelled TaskStatus = "CANCELLED"
+)
+
+// String returns the string representation of TaskStatus
+func (ts TaskStatus) String() string {
+	return string(ts)
+}
+
+// IsValid validates if the task status is supported
+func (ts TaskStatus) IsValid() bool {
+	switch ts {
+	case TaskStatusPending, TaskStatusRunning, TaskStatusCompleted, TaskStatusFailed, TaskStatusCancelled:
+		return true
+	default:
+		return false
 	}
 }
 
-// GetAllTokenizerTypes returns all valid tokenizer types
-func GetAllTokenizerTypes() []TokenizerType {
-	return []TokenizerType{
-		TokenizerTypeChinese,
-		TokenizerTypeEnglish,
-		TokenizerTypeMultilingual,
-		TokenizerTypeNone,
+// ParseTaskStatus parses string to TaskStatus
+func ParseTaskStatus(s string) (TaskStatus, error) {
+	ts := TaskStatus(strings.ToUpper(s))
+	if !ts.IsValid() {
+		return "", fmt.Errorf("invalid task status: %s", s)
 	}
-}
-
-// GetAllQueryTypes returns all valid query types
-func GetAllQueryTypes() []QueryType {
-	return []QueryType{
-		QueryTypeMatch,
-		QueryTypePhrase,
-		QueryTypeFuzzy,
-		QueryTypeBoolean,
-	}
-}
-
-// GetAllRankingAlgorithms returns all valid ranking algorithms
-func GetAllRankingAlgorithms() []RankingAlgorithm {
-	return []RankingAlgorithm{
-		RankingAlgorithmTFIDF,
-		RankingAlgorithmBM25,
-		RankingAlgorithmCustom,
-	}
-}
-
-// GetAllCacheTypes returns all valid cache types
-func GetAllCacheTypes() []CacheType {
-	return []CacheType{
-		CacheTypeMemory,
-		CacheTypeRedis,
-		CacheTypeHybrid,
-	}
-}
-
-// GetAllStatuses returns all valid status values
-func GetAllStatuses() []Status {
-	return []Status{
-		StatusUnknown,
-		StatusActive,
-		StatusInactive,
-		StatusPending,
-		StatusFailed,
-		StatusDeleted,
-	}
-}
-
-// GetAllLogLevels returns all valid log levels
-func GetAllLogLevels() []LogLevel {
-	return []LogLevel{
-		LogLevelDebug,
-		LogLevelInfo,
-		LogLevelWarn,
-		LogLevelError,
-		LogLevelFatal,
-	}
+	return ts, nil
 }
 
 //Personal.AI order the ending

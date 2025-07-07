@@ -1,122 +1,92 @@
 package constants
 
 import (
+	"encoding/json"
 	"fmt"
+	"time"
 )
 
-// Error code ranges
+// Error codes organized by layers
 const (
-	// Parameter errors: 1000-1999
-	ErrorCodeParameterBase = 1000
+	// Parameter validation errors (1000-1999)
+	ErrCodeInvalidParameter    = 1001
+	ErrCodeMissingParameter    = 1002
+	ErrCodeParameterOutOfRange = 1003
+	ErrCodeInvalidQuerySyntax  = 1004
+	ErrCodeInvalidPageSize     = 1005
+	ErrCodeInvalidSortField    = 1006
+	ErrCodeInvalidTimeRange    = 1007
+	ErrCodeInvalidTokenizer    = 1008
+	ErrCodeInvalidDatabaseType = 1009
+	ErrCodeInvalidIndexType    = 1010
 
-	// Business logic errors: 2000-2999
-	ErrorCodeBusinessBase = 2000
+	// Business logic errors (2000-2999)
+	ErrCodeIndexNotFound        = 2001
+	ErrCodeIndexAlreadyExists   = 2002
+	ErrCodeTableNotFound        = 2003
+	ErrCodeColumnNotFound       = 2004
+	ErrCodeQueryTimeout         = 2005
+	ErrCodeSearchResultEmpty    = 2006
+	ErrCodeIndexConfigInvalid   = 2007
+	ErrCodeTokenizationFailed   = 2008
+	ErrCodeRankingFailed        = 2009
+	ErrCodeCacheOperationFailed = 2010
+	ErrCodePermissionDenied     = 2011
+	ErrCodeQuotaExceeded        = 2012
 
-	// Infrastructure errors: 3000-3999
-	ErrorCodeInfrastructureBase = 3000
+	// Infrastructure errors (3000-3999)
+	ErrCodeDatabaseConnection   = 3001
+	ErrCodeDatabaseQuery        = 3002
+	ErrCodeRedisConnection      = 3003
+	ErrCodeRedisOperation       = 3004
+	ErrCodeConfigurationError   = 3005
+	ErrCodeNetworkError         = 3006
+	ErrCodeServiceUnavailable   = 3007
+	ErrCodeInternalServerError  = 3008
+	ErrCodeExternalServiceError = 3009
+	ErrCodeResourceExhausted    = 3010
 
-	// System errors: 4000-4999
-	ErrorCodeSystemBase = 4000
+	// Authentication and authorization errors (4000-4999)
+	ErrCodeUnauthorized           = 4001
+	ErrCodeInvalidToken           = 4002
+	ErrCodeTokenExpired           = 4003
+	ErrCodeInvalidAPIKey          = 4004
+	ErrCodeInsufficientPermission = 4005
+	ErrCodeRateLimitExceeded      = 4006
 )
 
-// Parameter error codes (1000-1999)
-const (
-	ErrorCodeInvalidParameter     = 1001
-	ErrorCodeMissingParameter     = 1002
-	ErrorCodeParameterOutOfRange  = 1003
-	ErrorCodeInvalidFormat        = 1004
-	ErrorCodeInvalidQuerySyntax   = 1005
-	ErrorCodeInvalidPagination    = 1006
-	ErrorCodeInvalidSortField     = 1007
-	ErrorCodeInvalidFilterFormat  = 1008
-	ErrorCodeQueryTooLong         = 1009
-	ErrorCodeResultSetTooLarge    = 1010
-)
-
-// Business logic error codes (2000-2999)
-const (
-	ErrorCodeIndexNotFound        = 2001
-	ErrorCodeIndexAlreadyExists   = 2002
-	ErrorCodeIndexConfigInvalid   = 2003
-	ErrorCodeSearchFailed         = 2004
-	ErrorCodeNoSearchResults      = 2005
-	ErrorCodeRankingFailed        = 2006
-	ErrorCodeTokenizationFailed   = 2007
-	ErrorCodeCacheKeyNotFound     = 2008
-	ErrorCodeCacheExpired         = 2009
-	ErrorCodeOperationNotAllowed  = 2010
-	ErrorCodeResourceNotFound     = 2011
-	ErrorCodeResourceConflict     = 2012
-	ErrorCodePermissionDenied     = 2013
-	ErrorCodeQuotaExceeded        = 2014
-	ErrorCodeRateLimitExceeded    = 2015
-)
-
-// Infrastructure error codes (3000-3999)
-const (
-	ErrorCodeDatabaseConnection   = 3001
-	ErrorCodeDatabaseQuery        = 3002
-	ErrorCodeDatabaseTimeout      = 3003
-	ErrorCodeCacheConnection      = 3004
-	ErrorCodeCacheOperation       = 3005
-	ErrorCodeNetworkTimeout       = 3006
-	ErrorCodeServiceUnavailable   = 3007
-	ErrorCodeConfigurationError   = 3008
-	ErrorCodeExternalServiceError = 3009
-	ErrorCodeStorageError         = 3010
-	ErrorCodeSerializationError   = 3011
-	ErrorCodeDeserializationError = 3012
-)
-
-// System error codes (4000-4999)
-const (
-	ErrorCodeInternalError        = 4001
-	ErrorCodeUnknownError         = 4002
-	ErrorCodeNotImplemented       = 4003
-	ErrorCodeServiceStartupFailed = 4004
-	ErrorCodeMemoryExhausted      = 4005
-	ErrorCodeResourceExhausted    = 4006
-	ErrorCodeDeadlockDetected     = 4007
-	ErrorCodeConcurrencyError     = 4008
-	ErrorCodeContextCanceled      = 4009
-	ErrorCodeContextTimeout       = 4010
-)
-
-// StarSeekError represents a custom error type for the StarSeek system
+// StarSeekError represents a custom error with code, message and details
 type StarSeekError struct {
 	Code      int                    `json:"code"`
 	Message   string                 `json:"message"`
-	Details   string                 `json:"details,omitempty"`
-	Cause     error                  `json:"cause,omitempty"`
-	Metadata  map[string]interface{} `json:"metadata,omitempty"`
-	Timestamp int64                  `json:"timestamp"`
+	Details   map[string]interface{} `json:"details,omitempty"`
+	Timestamp time.Time              `json:"timestamp"`
+	TraceID   string                 `json:"trace_id,omitempty"`
 }
 
 // Error implements the error interface
 func (e *StarSeekError) Error() string {
-	if e.Details != "" {
-		return fmt.Sprintf("[%d] %s: %s", e.Code, e.Message, e.Details)
-	}
-	return fmt.Sprintf("[%d] %s", e.Code, e.Message)
+	return fmt.Sprintf("StarSeek Error [%d]: %s", e.Code, e.Message)
 }
 
-// Unwrap returns the underlying cause error
-func (e *StarSeekError) Unwrap() error {
-	return e.Cause
+// JSON returns the JSON representation of the error
+func (e *StarSeekError) JSON() string {
+	jsonBytes, _ := json.Marshal(e)
+	return string(jsonBytes)
 }
 
-// WithMetadata adds metadata to the error
-func (e *StarSeekError) WithMetadata(key string, value interface{}) *StarSeekError {
-	if e.Metadata == nil {
-		e.Metadata = make(map[string]interface{})
+// WithDetail adds additional detail to the error
+func (e *StarSeekError) WithDetail(key string, value interface{}) *StarSeekError {
+	if e.Details == nil {
+		e.Details = make(map[string]interface{})
 	}
-	e.Metadata[key] = value
+	e.Details[key] = value
 	return e
 }
 
-// WithCause adds a cause error
-func (e *StarSeekError) WithCause(cause error) *StarSeekError {
-	e.Cause = cause
+// WithTraceID adds trace ID to the error
+func (e *StarSeekError) WithTraceID(traceID string) *StarSeekError {
+	e.TraceID = traceID
 	return e
 }
 
@@ -125,250 +95,140 @@ func NewError(code int, message string) *StarSeekError {
 	return &StarSeekError{
 		Code:      code,
 		Message:   message,
-		Timestamp: getCurrentTimestamp(),
+		Timestamp: time.Now(),
+		Details:   make(map[string]interface{}),
 	}
 }
 
-// NewErrorWithDetails creates a new StarSeekError with details
-func NewErrorWithDetails(code int, message, details string) *StarSeekError {
-	return &StarSeekError{
-		Code:      code,
-		Message:   message,
-		Details:   details,
-		Timestamp: getCurrentTimestamp(),
-	}
+// Error constructors for common errors
+
+// NewInvalidParameterError creates an invalid parameter error
+func NewInvalidParameterError(parameter string, value interface{}) *StarSeekError {
+	return NewError(ErrCodeInvalidParameter, fmt.Sprintf("Invalid parameter: %s", parameter)).
+		WithDetail("parameter", parameter).
+		WithDetail("value", value)
 }
 
-// NewErrorWithCause creates a new StarSeekError with a cause
-func NewErrorWithCause(code int, message string, cause error) *StarSeekError {
-	return &StarSeekError{
-		Code:      code,
-		Message:   message,
-		Cause:     cause,
-		Timestamp: getCurrentTimestamp(),
-	}
+// NewMissingParameterError creates a missing parameter error
+func NewMissingParameterError(parameter string) *StarSeekError {
+	return NewError(ErrCodeMissingParameter, fmt.Sprintf("Missing required parameter: %s", parameter)).
+		WithDetail("parameter", parameter)
 }
 
-// Predefined common errors
+// NewIndexNotFoundError creates an index not found error
+func NewIndexNotFoundError(indexName string) *StarSeekError {
+	return NewError(ErrCodeIndexNotFound, fmt.Sprintf("Index not found: %s", indexName)).
+		WithDetail("index_name", indexName)
+}
 
-// Parameter errors
-var (
-	ErrInvalidParameter     = NewError(ErrorCodeInvalidParameter, "Invalid parameter")
-	ErrMissingParameter     = NewError(ErrorCodeMissingParameter, "Missing required parameter")
-	ErrParameterOutOfRange  = NewError(ErrorCodeParameterOutOfRange, "Parameter value out of range")
-	ErrInvalidFormat        = NewError(ErrorCodeInvalidFormat, "Invalid format")
-	ErrInvalidQuerySyntax   = NewError(ErrorCodeInvalidQuerySyntax, "Invalid query syntax")
-	ErrInvalidPagination    = NewError(ErrorCodeInvalidPagination, "Invalid pagination parameters")
-	ErrInvalidSortField     = NewError(ErrorCodeInvalidSortField, "Invalid sort field")
-	ErrInvalidFilterFormat  = NewError(ErrorCodeInvalidFilterFormat, "Invalid filter format")
-	ErrQueryTooLong         = NewError(ErrorCodeQueryTooLong, "Query string too long")
-	ErrResultSetTooLarge    = NewError(ErrorCodeResultSetTooLarge, "Result set too large")
-)
+// NewTableNotFoundError creates a table not found error
+func NewTableNotFoundError(tableName string) *StarSeekError {
+	return NewError(ErrCodeTableNotFound, fmt.Sprintf("Table not found: %s", tableName)).
+		WithDetail("table_name", tableName)
+}
 
-// Business logic errors
-var (
-	ErrIndexNotFound        = NewError(ErrorCodeIndexNotFound, "Index not found")
-	ErrIndexAlreadyExists   = NewError(ErrorCodeIndexAlreadyExists, "Index already exists")
-	ErrIndexConfigInvalid   = NewError(ErrorCodeIndexConfigInvalid, "Invalid index configuration")
-	ErrSearchFailed         = NewError(ErrorCodeSearchFailed, "Search operation failed")
-	ErrNoSearchResults      = NewError(ErrorCodeNoSearchResults, "No search results found")
-	ErrRankingFailed        = NewError(ErrorCodeRankingFailed, "Ranking calculation failed")
-	ErrTokenizationFailed   = NewError(ErrorCodeTokenizationFailed, "Text tokenization failed")
-	ErrCacheKeyNotFound     = NewError(ErrorCodeCacheKeyNotFound, "Cache key not found")
-	ErrCacheExpired         = NewError(ErrorCodeCacheExpired, "Cache entry expired")
-	ErrOperationNotAllowed  = NewError(ErrorCodeOperationNotAllowed, "Operation not allowed")
-	ErrResourceNotFound     = NewError(ErrorCodeResourceNotFound, "Resource not found")
-	ErrResourceConflict     = NewError(ErrorCodeResourceConflict, "Resource conflict")
-	ErrPermissionDenied     = NewError(ErrorCodePermissionDenied, "Permission denied")
-	ErrQuotaExceeded        = NewError(ErrorCodeQuotaExceeded, "Quota exceeded")
-	ErrRateLimitExceeded    = NewError(ErrorCodeRateLimitExceeded, "Rate limit exceeded")
-)
+// NewDatabaseConnectionError creates a database connection error
+func NewDatabaseConnectionError(database string, err error) *StarSeekError {
+	return NewError(ErrCodeDatabaseConnection, fmt.Sprintf("Failed to connect to database: %s", database)).
+		WithDetail("database", database).
+		WithDetail("original_error", err.Error())
+}
 
-// Infrastructure errors
-var (
-	ErrDatabaseConnection   = NewError(ErrorCodeDatabaseConnection, "Database connection failed")
-	ErrDatabaseQuery        = NewError(ErrorCodeDatabaseQuery, "Database query failed")
-	ErrDatabaseTimeout      = NewError(ErrorCodeDatabaseTimeout, "Database operation timeout")
-	ErrCacheConnection      = NewError(ErrorCodeCacheConnection, "Cache connection failed")
-	ErrCacheOperation       = NewError(ErrorCodeCacheOperation, "Cache operation failed")
-	ErrNetworkTimeout       = NewError(ErrorCodeNetworkTimeout, "Network operation timeout")
-	ErrServiceUnavailable   = NewError(ErrorCodeServiceUnavailable, "Service unavailable")
-	ErrConfigurationError   = NewError(ErrorCodeConfigurationError, "Configuration error")
-	ErrExternalServiceError = NewError(ErrorCodeExternalServiceError, "External service error")
-	ErrStorageError         = NewError(ErrorCodeStorageError, "Storage operation failed")
-	ErrSerializationError   = NewError(ErrorCodeSerializationError, "Serialization failed")
-	ErrDeserializationError = NewError(ErrorCodeDeserializationError, "Deserialization failed")
-)
+// NewQueryTimeoutError creates a query timeout error
+func NewQueryTimeoutError(timeout time.Duration) *StarSeekError {
+	return NewError(ErrCodeQueryTimeout, fmt.Sprintf("Query timeout after %v", timeout)).
+		WithDetail("timeout", timeout.String())
+}
 
-// System errors
-var (
-	ErrInternalError        = NewError(ErrorCodeInternalError, "Internal server error")
-	ErrUnknownError         = NewError(ErrorCodeUnknownError, "Unknown error")
-	ErrNotImplemented       = NewError(ErrorCodeNotImplemented, "Feature not implemented")
-	ErrServiceStartupFailed = NewError(ErrorCodeServiceStartupFailed, "Service startup failed")
-	ErrMemoryExhausted      = NewError(ErrorCodeMemoryExhausted, "Memory exhausted")
-	ErrResourceExhausted    = NewError(ErrorCodeResourceExhausted, "Resource exhausted")
-	ErrDeadlockDetected     = NewError(ErrorCodeDeadlockDetected, "Deadlock detected")
-	ErrConcurrencyError     = NewError(ErrorCodeConcurrencyError, "Concurrency error")
-	ErrContextCanceled      = NewError(ErrorCodeContextCanceled, "Context canceled")
-	ErrContextTimeout       = NewError(ErrorCodeContextTimeout, "Context timeout")
-)
+// NewPermissionDeniedError creates a permission denied error
+func NewPermissionDeniedError(resource string, action string) *StarSeekError {
+	return NewError(ErrCodePermissionDenied, fmt.Sprintf("Permission denied for %s on %s", action, resource)).
+		WithDetail("resource", resource).
+		WithDetail("action", action)
+}
 
-// Error classification functions
+// NewRateLimitExceededError creates a rate limit exceeded error
+func NewRateLimitExceededError(limit int, window time.Duration) *StarSeekError {
+	return NewError(ErrCodeRateLimitExceeded, fmt.Sprintf("Rate limit exceeded: %d requests per %v", limit, window)).
+		WithDetail("limit", limit).
+		WithDetail("window", window.String())
+}
 
-// IsParameterError checks if the error is a parameter error
+// Error categorization functions
+
+// IsParameterError checks if the error is a parameter validation error
 func IsParameterError(err error) bool {
-	if starSeekErr, ok := err.(*StarSeekError); ok {
-		return starSeekErr.Code >= ErrorCodeParameterBase && starSeekErr.Code < ErrorCodeBusinessBase
+	if starseekErr, ok := err.(*StarSeekError); ok {
+		return starseekErr.Code >= 1000 && starseekErr.Code < 2000
 	}
 	return false
 }
 
 // IsBusinessError checks if the error is a business logic error
 func IsBusinessError(err error) bool {
-	if starSeekErr, ok := err.(*StarSeekError); ok {
-		return starSeekErr.Code >= ErrorCodeBusinessBase && starSeekErr.Code < ErrorCodeInfrastructureBase
+	if starseekErr, ok := err.(*StarSeekError); ok {
+		return starseekErr.Code >= 2000 && starseekErr.Code < 3000
 	}
 	return false
 }
 
 // IsInfrastructureError checks if the error is an infrastructure error
 func IsInfrastructureError(err error) bool {
-	if starSeekErr, ok := err.(*StarSeekError); ok {
-		return starSeekErr.Code >= ErrorCodeInfrastructureBase && starSeekErr.Code < ErrorCodeSystemBase
+	if starseekErr, ok := err.(*StarSeekError); ok {
+		return starseekErr.Code >= 3000 && starseekErr.Code < 4000
 	}
 	return false
 }
 
-// IsSystemError checks if the error is a system error
-func IsSystemError(err error) bool {
-	if starSeekErr, ok := err.(*StarSeekError); ok {
-		return starSeekErr.Code >= ErrorCodeSystemBase
+// IsAuthenticationError checks if the error is an authentication error
+func IsAuthenticationError(err error) bool {
+	if starseekErr, ok := err.(*StarSeekError); ok {
+		return starseekErr.Code >= 4000 && starseekErr.Code < 5000
 	}
 	return false
 }
 
-// IsRetryable checks if the error is retryable
-func IsRetryable(err error) bool {
-	if starSeekErr, ok := err.(*StarSeekError); ok {
-		switch starSeekErr.Code {
-		case ErrorCodeDatabaseTimeout,
-			ErrorCodeNetworkTimeout,
-			ErrorCodeServiceUnavailable,
-			ErrorCodeCacheConnection,
-			ErrorCodeExternalServiceError,
-			ErrorCodeContextTimeout:
+// IsRetryableError checks if the error is retryable
+func IsRetryableError(err error) bool {
+	if starseekErr, ok := err.(*StarSeekError); ok {
+		switch starseekErr.Code {
+		case ErrCodeQueryTimeout, ErrCodeDatabaseConnection, ErrCodeNetworkError,
+			ErrCodeServiceUnavailable, ErrCodeResourceExhausted:
 			return true
+		default:
+			return false
 		}
 	}
 	return false
 }
 
-// IsTemporary checks if the error is temporary
-func IsTemporary(err error) bool {
-	if starSeekErr, ok := err.(*StarSeekError); ok {
-		switch starSeekErr.Code {
-		case ErrorCodeRateLimitExceeded,
-			ErrorCodeQuotaExceeded,
-			ErrorCodeMemoryExhausted,
-			ErrorCodeResourceExhausted,
-			ErrorCodeConcurrencyError:
-			return true
-		}
-	}
-	return IsRetryable(err)
-}
-
-// GetErrorCategory returns the error category as string
+// GetErrorCategory returns the category of the error
 func GetErrorCategory(err error) string {
-	if IsParameterError(err) {
-		return "PARAMETER"
+	if starseekErr, ok := err.(*StarSeekError); ok {
+		switch {
+		case starseekErr.Code >= 1000 && starseekErr.Code < 2000:
+			return "parameter"
+		case starseekErr.Code >= 2000 && starseekErr.Code < 3000:
+			return "business"
+		case starseekErr.Code >= 3000 && starseekErr.Code < 4000:
+			return "infrastructure"
+		case starseekErr.Code >= 4000 && starseekErr.Code < 5000:
+			return "authentication"
+		default:
+			return "unknown"
+		}
 	}
-	if IsBusinessError(err) {
-		return "BUSINESS"
-	}
-	if IsInfrastructureError(err) {
-		return "INFRASTRUCTURE"
-	}
-	if IsSystemError(err) {
-		return "SYSTEM"
-	}
-	return "UNKNOWN"
+	return "system"
 }
 
-// GetErrorCode extracts error code from error
-func GetErrorCode(err error) int {
-	if starSeekErr, ok := err.(*StarSeekError); ok {
-		return starSeekErr.Code
-	}
-	return ErrorCodeUnknownError
-}
-
-// WrapError wraps an existing error with StarSeekError
-func WrapError(code int, message string, cause error) *StarSeekError {
-	return &StarSeekError{
-		Code:      code,
-		Message:   message,
-		Cause:     cause,
-		Timestamp: getCurrentTimestamp(),
-	}
-}
-
-// getCurrentTimestamp returns current unix timestamp
-func getCurrentTimestamp() int64 {
-	// This would typically use time.Now().Unix()
-	// For now, return 0 to avoid importing time package
-	return 0
-}
-
-// Error message templates for consistent error messaging
-const (
-	TemplateInvalidParameter     = "Invalid parameter '%s': %s"
-	TemplateMissingParameter     = "Missing required parameter: %s"
-	TemplateParameterOutOfRange  = "Parameter '%s' value %v is out of range [%v, %v]"
-	TemplateResourceNotFound     = "Resource '%s' with ID '%s' not found"
-	TemplateResourceConflict     = "Resource '%s' with ID '%s' already exists"
-	TemplateOperationFailed      = "Operation '%s' failed: %s"
-	TemplateServiceUnavailable   = "Service '%s' is currently unavailable"
-	TemplateConnectionFailed     = "Failed to connect to %s: %s"
-	TemplateTimeoutError         = "Operation '%s' timed out after %v"
+// Common error messages
+var (
+	ErrInvalidQuerySyntax  = NewError(ErrCodeInvalidQuerySyntax, "Invalid query syntax")
+	ErrSearchResultEmpty   = NewError(ErrCodeSearchResultEmpty, "No search results found")
+	ErrInternalServerError = NewError(ErrCodeInternalServerError, "Internal server error")
+	ErrServiceUnavailable  = NewError(ErrCodeServiceUnavailable, "Service temporarily unavailable")
+	ErrUnauthorized        = NewError(ErrCodeUnauthorized, "Authentication required")
+	ErrPermissionDenied    = NewError(ErrCodePermissionDenied, "Permission denied")
 )
-
-// Helper functions for creating formatted errors
-
-// NewInvalidParameterError creates a formatted invalid parameter error
-func NewInvalidParameterError(paramName, reason string) *StarSeekError {
-	return NewErrorWithDetails(ErrorCodeInvalidParameter,
-		"Invalid parameter",
-		fmt.Sprintf(TemplateInvalidParameter, paramName, reason))
-}
-
-// NewMissingParameterError creates a formatted missing parameter error
-func NewMissingParameterError(paramName string) *StarSeekError {
-	return NewErrorWithDetails(ErrorCodeMissingParameter,
-		"Missing parameter",
-		fmt.Sprintf(TemplateMissingParameter, paramName))
-}
-
-// NewResourceNotFoundError creates a formatted resource not found error
-func NewResourceNotFoundError(resourceType, resourceID string) *StarSeekError {
-	return NewErrorWithDetails(ErrorCodeResourceNotFound,
-		"Resource not found",
-		fmt.Sprintf(TemplateResourceNotFound, resourceType, resourceID))
-}
-
-// NewResourceConflictError creates a formatted resource conflict error
-func NewResourceConflictError(resourceType, resourceID string) *StarSeekError {
-	return NewErrorWithDetails(ErrorCodeResourceConflict,
-		"Resource conflict",
-		fmt.Sprintf(TemplateResourceConflict, resourceType, resourceID))
-}
-
-// NewOperationFailedError creates a formatted operation failed error
-func NewOperationFailedError(operation, reason string) *StarSeekError {
-	return NewErrorWithDetails(ErrorCodeInternalError,
-		"Operation failed",
-		fmt.Sprintf(TemplateOperationFailed, operation, reason))
-}
 
 //Personal.AI order the ending
