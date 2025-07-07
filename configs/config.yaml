@@ -1,0 +1,31 @@
+# configs/config.yaml
+
+server:
+  port: 8080 # HTTP server port
+
+log:
+  level: debug # Log level: debug, info, warn, error, fatal
+  format: console # Output format: console or json
+  output_path: stdout # Output path: stdout, stderr, or a file path (e.g., "logs/starseek.log")
+
+database:
+  dsn: "root:password@tcp(127.0.0.1:3306)/starseek_metadata?charset=utf8mb4&parseTime=True&loc=Local" # MySQL DSN for Starseek's own metadata
+
+redis:
+  addr: "localhost:6379" # Redis server address
+  password: "" # Redis password, leave empty if no password
+  db: 0 # Redis DB number
+
+starrocks:
+  dsn: "root:password@tcp(127.0.0.1:9030)/default_catalog?charset=utf8mb4&parseTime=True&loc=Local" # StarRocks BE or FE Query Port DSN
+  # Other StarRocks specific configurations can be added here
+  # max_idle_conns: 10
+  # max_open_conns: 100
+
+# Optional: Add configurations for other OLAP databases if supported
+# doris:
+#   dsn: "root:password@tcp(127.0.0.1:9030)/default_cluster?charset=utf8mb4&parseTime=True&loc=Local"
+# clickhouse:
+#   dsn: "tcp://127.0.0.1:9000?database=default&username=default&password="
+
+#Personal.AI order the ending
