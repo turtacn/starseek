@@ -45,31 +45,31 @@
 graph TD
     subgraph A[接口层（Interface Layer）]
         direction LR
-        API[RESTful API <br/> (Gin Framework)]
+        API[RESTful API <br/> （Gin Framework）]
         CLI[命令行工具（CLI）]
     end
 
     subgraph B[应用层（Application Layer）]
         direction LR
-        SearchApp[搜索应用服务 <br/> (Search Service)]
-        IndexApp[索引管理应用服务 <br/> (Index Registry Service)]
+        SearchApp[搜索应用服务 <br/> （Search Service）]
+        IndexApp[索引管理应用服务 <br/> （Index Registry Service）]
     end
 
     subgraph C[领域层（Domain Layer）]
         direction LR
         subgraph Models [领域模型]
-            M1[索引元数据 <br/> (IndexMetadata)]
-            M2[查询对象 <br/> (Query)]
-            M3[搜索结果 <br/> (SearchResult)]
+            M1[索引元数据 <br/> （IndexMetadata）]
+            M2[查询对象 <br/> （Query）]
+            M3[搜索结果 <br/> （SearchResult）]
         end
         subgraph Services [领域服务]
-            S1[查询处理器 <br/> (Query Processor)]
-            S2[排名服务 <br/> (Ranking Service)]
-            S3[任务调度器 <br/> (Task Scheduler)]
+            S1[查询处理器 <br/> （Query Processor）]
+            S2[排名服务 <br/> （Ranking Service）]
+            S3[任务调度器 <br/> （Task Scheduler）]
         end
         subgraph Repos [仓储接口]
-            R1[索引元数据仓储 <br/> (IndexMetadataRepository)]
-            R2[搜索仓储 <br/> (SearchRepository)]
+            R1[索引元数据仓储 <br/> （IndexMetadataRepository）]
+            R2[搜索仓储 <br/> （SearchRepository）]
         end
     end
 
@@ -81,9 +81,9 @@ graph TD
             Adpt3[ClickHouse 适配器]
         end
         subgraph InfraImpl [基础设施实现]
-            Cache[缓存服务 <br/> (Redis)]
-            Log[日志服务 <br/> (Zap)]
-            Persistence[持久化实现 <br/> (GORM/sqlx)]
+            Cache[缓存服务 <br/> （Redis）]
+            Log[日志服务 <br/> （Zap）]
+            Persistence[持久化实现 <br/> （GORM/sqlx）]
         end
     end
 
@@ -114,19 +114,19 @@ graph TD
     end
 
     subgraph "基础设施（Infrastructure）"
-        LB[负载均衡器 <br/> (Nginx/SLB)]
+        LB[负载均衡器 <br/> （Nginx/SLB）]
         subgraph "Starseek 服务集群"
             S1[Starseek 实例 1]
             S2[Starseek 实例 2]
             S3[Starseek 实例 N]
         end
-        Redis[Redis 集群 <br/> (缓存/任务队列)]
+        Redis[Redis 集群 <br/> （缓存/任务队列）]
     end
     
     subgraph "数据仓库（Data Warehouse）"
         SR[StarRocks 集群]
-        DR[(可选)Doris 集群]
-        CH[(可选)ClickHouse 集群]
+        DR[（可选）Doris 集群]
+        CH[（可选）ClickHouse 集群]
     end
 
     User --> LB
@@ -163,40 +163,40 @@ graph TD
 ```mermaid
 sequenceDiagram
     participant User as 用户
-    participant Gateway as API 网关<br/>(接口层)
-    participant AppSvc as 应用服务<br/>(应用层)
-    participant QP as 查询处理器<br/>(领域层)
-    participant Ranker as 排名服务<br/>(领域层)
-    participant Scheduler as 任务调度器<br/>(领域层)
-    participant Cache as 缓存<br/>(Redis)
-    participant DB as StarRocks<br/>(基础设施层)
+    participant Gateway as API 网关<br/>（接口层）
+    participant AppSvc as 应用服务<br/>（应用层）
+    participant QP as 查询处理器<br/>（领域层）
+    participant Ranker as 排名服务<br/>（领域层）
+    participant Scheduler as 任务调度器<br/>（领域层）
+    participant Cache as 缓存<br/>（Redis）
+    participant DB as StarRocks<br/>（基础设施层）
 
     User->>Gateway: GET /search?q=...
-    Gateway->>AppSvc: HandleSearch(request)
-    AppSvc->>QP: Parse(query, fields)
+    Gateway->>AppSvc: HandleSearch（request）
+    AppSvc->>QP: Parse（query, fields）
     QP-->>AppSvc: ParsedQueryObject
     
-    AppSvc->>Scheduler: Schedule(ParsedQueryObject)
+    AppSvc->>Scheduler: Schedule（ParsedQueryObject）
     
-    Scheduler->>Cache: Get(keyword_cache:人工智能)
-    alt 缓存命中 (Cache Hit)
+    Scheduler->>Cache: Get（keyword_cache:人工智能）
+    alt 缓存命中 （Cache Hit）
         Cache-->>Scheduler: RowID Bitmap
         Scheduler-->>AppSvc: Merged Results
-    else 缓存未命中 (Cache Miss)
-        Scheduler->>DB: 并发查询<br/>SELECT rowid FROM t1 WHERE MATCH(title, '人工智能')<br/>SELECT rowid FROM t2 WHERE MATCH(content, '人工智能')
+    else 缓存未命中 （Cache Miss）
+        Scheduler->>DB: 并发查询<br/>SELECT rowid FROM t1 WHERE MATCH（title, '人工智能'）<br/>SELECT rowid FROM t2 WHERE MATCH（content, '人工智能'）
         DB-->>Scheduler: 各表 RowIDs
-        Scheduler->>Cache: Set(keyword_cache:人工智能, MergedRowIDs)
+        Scheduler->>Cache: Set（keyword_cache:人工智能, MergedRowIDs）
         Scheduler-->>AppSvc: Merged Results
     end
 
-    AppSvc->>DB: 根据RowIDs获取原始数据<br/>SELECT * FROM ... WHERE rowid IN (...)
+    AppSvc->>DB: 根据RowIDs获取原始数据<br/>SELECT * FROM ... WHERE rowid IN （...）
     DB-->>AppSvc: 原始行数据
     
-    AppSvc->>Ranker: Rank(results, query)
+    AppSvc->>Ranker: Rank（results, query）
     Ranker-->>AppSvc: 重排序后的结果
     
     AppSvc->>Gateway: Formatted Response
-    Gateway-->>User: JSON 结果 (含高亮)
+    Gateway-->>User: JSON 结果 （含高亮）
 ```
 
 ## 5\. 与 Elasticsearch 的对比分析
